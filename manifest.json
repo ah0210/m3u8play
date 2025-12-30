@@ -1,0 +1,53 @@
+{
+  "name": "M3U8/MP4 播放器",
+  "short_name": "视频播放器",
+  "description": "一个功能强大的M3U8/MP4视频播放器，支持多种播放格式和自定义控制",
+  "start_url": "./play.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#4285f4",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "加载视频",
+      "short_name": "加载",
+      "description": "快速加载新视频",
+      "url": "./play.html#load",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "播放历史",
+      "short_name": "历史",
+      "description": "查看播放历史",
+      "url": "./play.html#history",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "categories": ["entertainment", "multimedia", "video"]
+}
