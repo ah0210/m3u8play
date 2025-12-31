@@ -49,6 +49,9 @@ const el = {
     historyHeader: document.getElementById('history-header'),
     historyTitle: document.getElementById('historyTitle'),
     historyClear: document.getElementById('history-clear'),
+    historyExport: document.getElementById('history-export'),
+    historyImport: document.getElementById('history-import'),
+    historyImportInput: document.getElementById('history-import-input'),
     historyBody: document.getElementById('history-body'),
     historyEmpty: document.getElementById('history-empty'),
     volumeIcon: document.getElementById('volume-icon'),
@@ -507,7 +510,12 @@ function renderPlayHistory() {
             historyItem.className = 'history-item';
             historyItem.innerHTML = `
                 <div class="history-item-content">
-                    <div class="history-item-title">${item.title}</div>
+                    <div class="history-item-title-container">
+                        <span class="history-item-title" data-url="${item.url}">${item.title}</span>
+                        <button class="history-item-edit" title="编辑名称" data-url="${item.url}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
                     <div class="history-item-meta">
                         <span class="history-item-date">${new Date(item.date).toLocaleString()}</span>
                         <span class="history-item-time">播放至 ${formatTime(item.time)} / ${formatTime(item.duration)}</span>
@@ -550,6 +558,107 @@ function addHistoryItemListeners() {
             deleteHistoryItem(url);
         });
     });
+    
+    // 编辑按钮事件
+    document.querySelectorAll('.history-item-edit').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const url = e.target.closest('.history-item-edit').dataset.url;
+            editHistoryItem(url);
+        });
+    });
+}
+
+// 编辑历史记录项名称
+function editHistoryItem(url) {
+    const historyList = getPlayHistory();
+    const item = historyList.find(item => item.url === url);
+    if (!item) return;
+    
+    const newTitle = prompt('请输入新的名称：', item.title);
+    if (newTitle !== null && newTitle.trim() !== '') {
+        item.title = newTitle.trim();
+        // 保存更新后的历史记录
+        const historyKey = 'videoPlayHistoryList';
+        localStorage.setItem(historyKey, JSON.stringify(historyList));
+        renderPlayHistory();
+        addLog(`编辑播放历史名称：${url} -> ${newTitle}`, 'info');
+    }
+}
+
+// 导出播放历史
+function exportPlayHistory() {
+    const historyList = getPlayHistory();
+    const dataStr = JSON.stringify(historyList, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    // 创建下载链接
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `video-play-history-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // 释放URL
+    URL.revokeObjectURL(url);
+    
+    addLog('播放历史导出成功', 'info');
+    showStatus('播放历史导出成功', 'success');
+}
+
+// 导入播放历史
+function importPlayHistory(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const importedHistory = JSON.parse(e.target.result);
+            if (!Array.isArray(importedHistory)) {
+                throw new Error('导入的文件格式不正确');
+            }
+            
+            // 获取现有历史记录
+            const historyKey = 'videoPlayHistoryList';
+            const existingHistory = getPlayHistory();
+            
+            // 合并历史记录，去重，保留最新的
+            const combinedHistory = [...importedHistory, ...existingHistory];
+            const uniqueHistory = [];
+            const urlSet = new Set();
+            
+            for (const item of combinedHistory) {
+                if (!urlSet.has(item.url) && item.url && typeof item === 'object') {
+                    urlSet.add(item.url);
+                    // 确保每个项目都有必要的属性
+                    const validItem = {
+                        url: item.url,
+                        title: item.title || item.url.split('/').pop().split('?')[0] || '未命名视频',
+                        time: item.time || 0,
+                        duration: item.duration || 0,
+                        date: item.date || new Date().toISOString()
+                    };
+                    uniqueHistory.push(validItem);
+                }
+            }
+            
+            // 按日期排序，保留最新的20条
+            uniqueHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const finalHistory = uniqueHistory.slice(0, 20);
+            
+            // 保存合并后的历史记录
+            localStorage.setItem(historyKey, JSON.stringify(finalHistory));
+            
+            // 更新界面
+            renderPlayHistory();
+            
+            addLog(`播放历史导入成功，共导入 ${importedHistory.length} 条记录`, 'info');
+            showStatus(`播放历史导入成功，共导入 ${importedHistory.length} 条记录`, 'success');
+        } catch (error) {
+            addLog(`播放历史导入失败：${error.message}`, 'error');
+            showStatus(`播放历史导入失败：${error.message}`, 'error');
+        }
+    };
+    reader.readAsText(file);
 }
 
 // 删除单个历史记录项
@@ -1088,6 +1197,22 @@ function bindEvents() {
     });
 
     el.historyClear.addEventListener('click', clearPlayHistory);
+
+    // 历史记录导入导出
+    el.historyExport.addEventListener('click', exportPlayHistory);
+    
+    el.historyImport.addEventListener('click', () => {
+        el.historyImportInput.click();
+    });
+    
+    el.historyImportInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            importPlayHistory(file);
+            // 重置文件输入，允许重新选择同一文件
+            e.target.value = '';
+        }
+    });
 
     // 页面关闭
     window.addEventListener('beforeunload', () => {

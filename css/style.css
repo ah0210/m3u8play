@@ -462,6 +462,12 @@ body.dark .log-panel {
     cursor: pointer;
     transition: background 0.2s;
 }
+
+.history-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
 body.light .log-header {
     background: #e0e0e0;
 }
@@ -535,13 +541,55 @@ body.dark .history-item:hover {
     min-width: 0;
 }
 
+.history-item-title-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
 .history-item-title {
     font-weight: bold;
     font-size: 13px;
-    margin-bottom: 4px;
+    flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.history-item-edit {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, color 0.2s ease;
+    opacity: 0;
+}
+
+.history-item:hover .history-item-edit {
+    opacity: 1;
+}
+
+.history-item-edit:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #4285f4;
+}
+
+body.dark .history-item-edit {
+    color: #aaa;
+}
+
+body.dark .history-item-edit:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #5c8ef7;
 }
 
 .history-item-meta {

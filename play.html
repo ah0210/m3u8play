@@ -175,7 +175,12 @@
     <div class="log-panel" id="history-panel">
         <div class="log-header" id="history-header">
             <span id="historyTitle">播放历史</span>
-            <button class="log-clear" id="history-clear">清空历史</button>
+            <div class="history-header-actions">
+                <button class="log-clear" id="history-export">导出历史</button>
+                <input type="file" id="history-import-input" accept=".json" style="display: none;">
+                <button class="log-clear" id="history-import">导入历史</button>
+                <button class="log-clear" id="history-clear">清空历史</button>
+            </div>
         </div>
         <div class="log-body" id="history-body">
             <div class="history-empty" id="history-empty">暂无播放历史</div>
