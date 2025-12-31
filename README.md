@@ -86,6 +86,24 @@
 - **快速运行（无需安装依赖）**：`npx serve -s . -l 3000`
 - **开发模式**：`npm run dev`（同 `npm start`）
 
+#### 本地服务
+
+- **启动服务**：`npx serve`
+```
+   │Serving!                                  │
+   │                                          │
+   │   - Local:    http://localhost:3000      │
+   │   - Network:  http://192.168.1.35:3000   │
+   │                                          │
+   │   Copied local address to clipboard!     │
+```
+- **停止服务**：`Ctrl + C` 
+               `taskkill /pid 3000 /f  # 替换 1234 为实际 PID`
+
+- **批量停止**：
+`Windows：taskkill /f /im node.exe；`
+`Mac/Linux：pkill node。`            
+
 #### 服务管理特性
 
 - ✅ 自动检查服务是否已在运行
