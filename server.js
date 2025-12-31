@@ -42,7 +42,7 @@ function startServer() {
     const hasLocalServe = fs.existsSync(servePath);
     
     const serveCommand = hasLocalServe ? servePath : 'npx serve';
-    const serveArgs = hasLocalServe ? ['-s', '.', '-l', '3000'] : ['-s', '.', '-l', '3000'];
+    const serveArgs = hasLocalServe ? ['-s', '.', '-l', '3000', '--single'] : ['-s', '.', '-l', '3000', '--single'];
     
     // 启动serve服务器
     const server = spawn(serveCommand, serveArgs, {

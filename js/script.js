@@ -449,7 +449,7 @@ function handleNetworkStatus() {
 }
 
 // 播放历史管理
-function savePlayHistory(url, time = 0) {
+async function savePlayHistory(url, time = 0) {
     if (!url) return;
     
     // 使用防抖机制，避免频繁写入
@@ -457,108 +457,76 @@ function savePlayHistory(url, time = 0) {
         clearTimeout(saveHistoryTimer);
     }
     
-    saveHistoryTimer = setTimeout(() => {
-        const historyKey = 'videoPlayHistoryList';
-        const maxHistory = 120;
-        
-        // 获取现有历史记录
-        let historyList = JSON.parse(localStorage.getItem(historyKey) || '[]');
-        
-        // 如果历史记录为空，添加一些测试数据
-        if (historyList.length === 0) {
-            historyList = [
-                {
-                    url: 'https://example.com/video1.mp4',
-                    title: '测试视频1',
-                    time: 0,
-                    duration: 3600,
-                    date: new Date().toISOString(),
-                    playCount: 5
-                },
-                {
-                    url: 'https://example.com/video2.m3u8',
-                    title: '测试视频2',
-                    time: 120,
-                    duration: 2400,
-                    date: new Date(Date.now() - 86400000).toISOString(),
-                    playCount: 10
-                },
-                {
-                    url: 'https://example.com/video3.mp4',
-                    title: '测试视频3',
-                    time: 60,
-                    duration: 1800,
-                    date: new Date(Date.now() - 172800000).toISOString(),
-                    playCount: 3
-                }
-            ];
-            localStorage.setItem(historyKey, JSON.stringify(historyList));
-        }
-        
-        // 查找是否已存在该记录
-        const existingIndex = historyList.findIndex(item => item.url === url);
-        let updatedList;
-        
-        if (existingIndex !== -1) {
-            // 如果存在，更新记录
-            const existingItem = historyList[existingIndex];
-            const updatedItem = {
-                ...existingItem,
-                time: Math.round(time),
-                duration: Math.round(el.video.duration || 0),
-                date: new Date().toISOString(),
-                playCount: (existingItem.playCount || 0) + 1 // 增加播放次数
-            };
+    saveHistoryTimer = setTimeout(async () => {
+        try {
+            // 获取现有记录
+            const existingItem = await playHistoryStorage.getRecord(url);
             
-            // 移除旧记录
-            const filteredList = historyList.filter((_, index) => index !== existingIndex);
-            // 添加更新后的记录到开头
-            updatedList = [updatedItem, ...filteredList];
-        } else {
-            // 如果不存在，创建新记录
+            // 准备记录数据
             const historyItem = {
                 url: url,
-                title: url.split('/').pop().split('?')[0] || '未命名视频',
+                title: existingItem ? existingItem.title : (url.split('/').pop().split('?')[0] || '未命名视频'),
                 time: Math.round(time),
-                duration: Math.round(el.video.duration || 0),
+                duration: Math.round(el.video.duration || existingItem?.duration || 0),
                 date: new Date().toISOString(),
-                playCount: 1 // 初始播放次数为1
+                playCount: (existingItem?.playCount || 0) + 1
             };
             
-            // 添加到历史记录开头
-            updatedList = [historyItem, ...historyList];
+            // 保存到IndexedDB
+            await playHistoryStorage.saveRecord(historyItem);
+            addLog(`保存播放历史：${url}`, 'info');
+            
+            // 更新历史记录面板
+            await renderPlayHistory();
+        } catch (error) {
+            console.error('保存播放历史失败:', error);
+            addLog(`保存播放历史失败：${error.message}`, 'error');
         }
-        
-        // 限制最大记录数
-        updatedList = updatedList.slice(0, maxHistory);
-        
-        // 保存到本地存储
-        localStorage.setItem(historyKey, JSON.stringify(updatedList));
-        addLog(`保存播放历史：${url}`, 'info');
-        
-        // 更新历史记录面板
-        renderPlayHistory();
     }, SAVE_HISTORY_DELAY);
 }
 
 // 获取播放历史列表
-function getPlayHistory() {
-    const historyKey = 'videoPlayHistoryList';
-    return JSON.parse(localStorage.getItem(historyKey) || '[]');
+async function getPlayHistory(sortBy = 'date', sortOrder = 'desc') {
+    try {
+        return await playHistoryStorage.getAllRecords({ sortBy, sortOrder });
+    } catch (error) {
+        console.error('获取播放历史失败:', error);
+        return [];
+    }
 }
 
 // 清空播放历史
-function clearPlayHistory() {
-    const historyKey = 'videoPlayHistoryList';
-    localStorage.removeItem(historyKey);
-    renderPlayHistory();
-    addLog('播放历史已清空', 'info');
-    showStatus('播放历史已清空', 'success');
+async function clearPlayHistory() {
+    try {
+        await playHistoryStorage.clearAllRecords();
+        await renderPlayHistory();
+        addLog('播放历史已清空', 'info');
+        showStatus('播放历史已清空', 'success');
+    } catch (error) {
+        console.error('清空播放历史失败:', error);
+        showStatus('清空播放历史失败', 'error');
+    }
 }
 
 // 渲染播放历史面板
-function renderPlayHistory() {
-    const historyList = getPlayHistory();
+async function renderPlayHistory(sortMode = null) {
+    // 获取当前排序方式
+    const currentSortMode = sortMode || localStorage.getItem('historySortMode') || 'recent';
+    
+    // 确定排序参数
+    let sortBy, sortOrder;
+    if (currentSortMode === 'hot') {
+        // 按热度排序（播放次数多的排在前面）
+        sortBy = 'playCount';
+        sortOrder = 'desc';
+    } else {
+        // 按时间排序（最新的排在前面）
+        sortBy = 'date';
+        sortOrder = 'desc';
+    }
+    
+    // 使用异步方式获取播放历史
+    const historyList = await getPlayHistory(sortBy, sortOrder);
     const historyBody = el.historyBody;
     const historyEmpty = el.historyEmpty;
     
@@ -573,21 +541,8 @@ function renderPlayHistory() {
         // 隐藏空状态
         historyEmpty.style.display = 'none';
         
-        // 获取当前排序方式
-        const sortMode = localStorage.getItem('historySortMode') || 'recent';
-        
-        // 根据排序方式排序历史记录
-        const sortedHistory = [...historyList];
-        if (sortMode === 'hot') {
-            // 按热度排序（播放次数多的排在前面）
-            sortedHistory.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
-        } else {
-            // 按时间排序（最新的排在前面）
-            sortedHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
-        }
-        
         // 渲染历史记录
-        sortedHistory.forEach(item => {
+        historyList.forEach(item => {
             const historyItem = document.createElement('div');
             // 为当前播放的视频添加突出显示类
             const isCurrentPlaying = currentVideoUrl === item.url;
@@ -667,118 +622,90 @@ function addHistoryItemListeners() {
 }
 
 // 编辑历史记录项名称
-function editHistoryItem(url) {
-    const historyList = getPlayHistory();
-    const item = historyList.find(item => item.url === url);
-    if (!item) return;
-    
-    const newTitle = prompt('请输入新的名称：', item.title);
-    if (newTitle !== null && newTitle.trim() !== '') {
-        item.title = newTitle.trim();
-        // 保存更新后的历史记录
-        const historyKey = 'videoPlayHistoryList';
-        localStorage.setItem(historyKey, JSON.stringify(historyList));
-        renderPlayHistory();
-        addLog(`编辑播放历史名称：${url} -> ${newTitle}`, 'info');
+async function editHistoryItem(url) {
+    try {
+        const item = await playHistoryStorage.getRecord(url);
+        if (!item) return;
+        
+        const newTitle = prompt('请输入新的名称：', item.title);
+        if (newTitle !== null && newTitle.trim() !== '') {
+            item.title = newTitle.trim();
+            // 保存更新后的历史记录
+            await playHistoryStorage.saveRecord(item);
+            await renderPlayHistory();
+            addLog(`编辑播放历史名称：${url} -> ${newTitle}`, 'info');
+        }
+    } catch (error) {
+        console.error('编辑播放历史失败:', error);
+        showStatus('编辑播放历史失败', 'error');
     }
 }
 
 // 导出播放历史
-function exportPlayHistory() {
-    const historyList = getPlayHistory();
-    const dataStr = JSON.stringify(historyList, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    // 创建下载链接
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `video-play-history-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // 释放URL
-    URL.revokeObjectURL(url);
-    
-    addLog('播放历史导出成功', 'info');
-    showStatus('播放历史导出成功', 'success');
+async function exportPlayHistory() {
+    try {
+        const historyList = await getPlayHistory();
+        const dataStr = JSON.stringify(historyList, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        // 创建下载链接
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `video-play-history-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // 释放URL
+        URL.revokeObjectURL(url);
+        
+        addLog('播放历史导出成功', 'info');
+        showStatus('播放历史导出成功', 'success');
+    } catch (error) {
+        console.error('导出播放历史失败:', error);
+        showStatus('导出播放历史失败', 'error');
+    }
 }
 
 // 导入播放历史
-function importPlayHistory(file) {
+async function importPlayHistory(file) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
         try {
             const importedHistory = JSON.parse(e.target.result);
             if (!Array.isArray(importedHistory)) {
                 throw new Error('导入的文件格式不正确');
             }
             
-            // 获取现有历史记录
-            const historyKey = 'videoPlayHistoryList';
-            const existingHistory = getPlayHistory();
-            const maxHistory = 120;
-            
-            // 创建URL到索引的映射，用于快速查找
-            const urlMap = new Map();
-            const mergedHistory = [];
-            
-            // 先处理现有历史记录，保存到映射中
-            existingHistory.forEach(item => {
-                urlMap.set(item.url, item);
-                mergedHistory.push(item);
-            });
-            
             // 处理导入的历史记录
-            importedHistory.forEach(importedItem => {
+            let importedCount = 0;
+            for (const importedItem of importedHistory) {
                 if (importedItem.url && typeof importedItem === 'object') {
-                    if (urlMap.has(importedItem.url)) {
-                        // 如果已存在，合并播放次数和时间
-                        const existingItem = urlMap.get(importedItem.url);
-                        const mergedItem = {
-                            ...existingItem,
-                            // 取最新的时间
-                            date: new Date(importedItem.date) > new Date(existingItem.date) ? importedItem.date : existingItem.date,
-                            // 合并播放次数
-                            playCount: (existingItem.playCount || 0) + (importedItem.playCount || 1)
-                        };
-                        
-                        // 更新映射和数组
-                        urlMap.set(importedItem.url, mergedItem);
-                        const index = mergedHistory.findIndex(item => item.url === importedItem.url);
-                        if (index !== -1) {
-                            mergedHistory[index] = mergedItem;
-                        }
-                    } else {
-                        // 如果不存在，添加新记录
-                        const newItem = {
-                            url: importedItem.url,
-                            title: importedItem.title || importedItem.url.split('/').pop().split('?')[0] || '未命名视频',
-                            time: importedItem.time || 0,
-                            duration: importedItem.duration || 0,
-                            date: importedItem.date || new Date().toISOString(),
-                            playCount: importedItem.playCount || 1
-                        };
-                        
-                        urlMap.set(importedItem.url, newItem);
-                        mergedHistory.push(newItem);
-                    }
+                    // 获取现有记录
+                    const existingItem = await playHistoryStorage.getRecord(importedItem.url);
+                    
+                    // 准备合并后的记录
+                    const mergedItem = {
+                        url: importedItem.url,
+                        title: existingItem ? existingItem.title : (importedItem.title || importedItem.url.split('/').pop().split('?')[0] || '未命名视频'),
+                        time: existingItem ? existingItem.time : (importedItem.time || 0),
+                        duration: existingItem ? existingItem.duration : (importedItem.duration || 0),
+                        date: existingItem ? existingItem.date : (importedItem.date || new Date().toISOString()),
+                        playCount: (existingItem?.playCount || 0) + (importedItem.playCount || 1)
+                    };
+                    
+                    // 保存到IndexedDB
+                    await playHistoryStorage.saveRecord(mergedItem);
+                    importedCount++;
                 }
-            });
-            
-            // 按日期排序，保留最新的记录
-            mergedHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
-            const finalHistory = mergedHistory.slice(0, maxHistory);
-            
-            // 保存合并后的历史记录
-            localStorage.setItem(historyKey, JSON.stringify(finalHistory));
+            }
             
             // 更新界面
-            renderPlayHistory();
+            await renderPlayHistory();
             
-            addLog(`播放历史导入成功，共导入 ${importedHistory.length} 条记录`, 'info');
-            showStatus(`播放历史导入成功，共导入 ${importedHistory.length} 条记录`, 'success');
+            addLog(`播放历史导入成功，共导入 ${importedCount} 条记录`, 'info');
+            showStatus(`播放历史导入成功，共导入 ${importedCount} 条记录`, 'success');
         } catch (error) {
             addLog(`播放历史导入失败：${error.message}`, 'error');
             showStatus(`播放历史导入失败：${error.message}`, 'error');
@@ -788,13 +715,15 @@ function importPlayHistory(file) {
 }
 
 // 删除单个历史记录项
-function deleteHistoryItem(url) {
-    const historyKey = 'videoPlayHistoryList';
-    const historyList = JSON.parse(localStorage.getItem(historyKey) || '[]');
-    const updatedList = historyList.filter(item => item.url !== url);
-    localStorage.setItem(historyKey, JSON.stringify(updatedList));
-    renderPlayHistory();
-    addLog(`删除播放历史：${url}`, 'info');
+async function deleteHistoryItem(url) {
+    try {
+        await playHistoryStorage.deleteRecord(url);
+        await renderPlayHistory();
+        addLog(`删除播放历史：${url}`, 'info');
+    } catch (error) {
+        console.error('删除播放历史失败:', error);
+        showStatus('删除播放历史失败', 'error');
+    }
 }
 
 // 格式化时间（秒 -> mm:ss）
@@ -816,12 +745,16 @@ function savePlayPosition(url, time) {
 }
 
 // 获取播放位置 - 保留原有功能
-function getPlayPosition(url) {
-    const historyList = getPlayHistory();
-    const historyItem = historyList.find(item => item.url === url);
-    const time = historyItem ? historyItem.time : 0;
-    addLog(`读取播放位置：${url} -> ${Math.round(time)}秒`, 'info');
-    return time;
+async function getPlayPosition(url) {
+    try {
+        const historyItem = await playHistoryStorage.getRecord(url);
+        const time = historyItem ? historyItem.time : 0;
+        addLog(`读取播放位置：${url} -> ${Math.round(time)}秒`, 'info');
+        return time;
+    } catch (error) {
+        console.error('获取播放位置失败:', error);
+        return 0;
+    }
 }
 
 // 加载视频
@@ -891,11 +824,11 @@ async function loadVideo(url, restorePosition = false) {
 
                 hls.attachMedia(el.video);
 
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                hls.on(Hls.Events.MANIFEST_PARSED, async () => {
                     hideLoading();
                     initQualitySelector(hls);
                     if (restorePosition) {
-                                const savedTime = getPlayPosition(url);
+                                const savedTime = await getPlayPosition(url);
                                 if (savedTime > 0) el.video.currentTime = savedTime;
                             }
                             showStatus(i18n[currentLang].statusSuccessLoad, 'success');
@@ -903,7 +836,7 @@ async function loadVideo(url, restorePosition = false) {
                             el.pipBtn.disabled = !('pictureInPictureEnabled' in document);
                             el.screenshotBtn.disabled = false;
                             // 记录播放历史
-                            savePlayHistory(url);
+                            await savePlayHistory(url);
                             // 自动播放
                             el.video.play().then(() => {
                                 el.pauseBtn.disabled = false;
@@ -956,10 +889,10 @@ async function loadVideo(url, restorePosition = false) {
                 hls.loadSource(url);
             } else if (el.video.canPlayType('application/vnd.apple.mpegurl')) {
                 el.video.src = url;
-                el.video.addEventListener('loadedmetadata', () => {
+                el.video.addEventListener('loadedmetadata', async () => {
                     hideLoading();
                     if (restorePosition) {
-                        const savedTime = getPlayPosition(url);
+                        const savedTime = await getPlayPosition(url);
                         if (savedTime > 0) el.video.currentTime = savedTime;
                     }
                     showStatus(i18n[currentLang].statusSuccessLoadNative, 'success');
@@ -967,7 +900,7 @@ async function loadVideo(url, restorePosition = false) {
                     el.pipBtn.disabled = !('pictureInPictureEnabled' in document);
                     el.screenshotBtn.disabled = false;
                     // 记录播放历史
-                    savePlayHistory(url);
+                    await savePlayHistory(url);
                     // 自动播放
                     el.video.play().then(() => {
                         el.pauseBtn.disabled = false;
@@ -998,10 +931,10 @@ async function loadVideo(url, restorePosition = false) {
     }
 else {
     el.video.src = url;
-    el.video.addEventListener('loadedmetadata', () => {
+    el.video.addEventListener('loadedmetadata', async () => {
         hideLoading();
         if (restorePosition) {
-            const savedTime = getPlayPosition(url);
+            const savedTime = await getPlayPosition(url);
             if (savedTime > 0) el.video.currentTime = savedTime;
         }
         showStatus(i18n[currentLang].statusSuccessLoad, 'success');
@@ -1009,7 +942,7 @@ else {
         el.pipBtn.disabled = !('pictureInPictureEnabled' in document);
         el.screenshotBtn.disabled = false;
         // 记录播放历史
-        savePlayHistory(url);
+        await savePlayHistory(url);
         // 自动播放
         el.video.play().then(() => {
             el.pauseBtn.disabled = false;
@@ -1313,16 +1246,16 @@ function bindEvents() {
     window.addEventListener('offline', handleNetworkStatus);
 
     // 播放历史
-    el.historyBtn.addEventListener('click', () => {
+    el.historyBtn.addEventListener('click', async () => {
         el.sidebar.classList.toggle('show');
-        renderPlayHistory();
+        await renderPlayHistory();
         addLog('切换历史记录侧边栏', 'info');
     });
 
     // 侧边栏切换按钮
-    el.sidebarToggle.addEventListener('click', () => {
+    el.sidebarToggle.addEventListener('click', async () => {
         el.sidebar.classList.toggle('show');
-        renderPlayHistory();
+        await renderPlayHistory();
         addLog('切换历史记录侧边栏', 'info');
     });
 
@@ -1349,7 +1282,7 @@ function bindEvents() {
     });
     
     // 历史记录排序
-    function setHistorySortMode(mode) {
+    async function setHistorySortMode(mode) {
         // 保存排序方式到localStorage
         localStorage.setItem('historySortMode', mode);
         
@@ -1364,17 +1297,17 @@ function bindEvents() {
         }
         
         // 重新渲染历史记录
-        renderPlayHistory();
+        await renderPlayHistory(mode);
         addLog(`播放历史排序方式已切换至 ${mode === 'recent' ? '最新' : '热度'}`, 'info');
     }
     
     // 排序按钮事件
-    el.sortRecentBtn.addEventListener('click', () => {
-        setHistorySortMode('recent');
+    el.sortRecentBtn.addEventListener('click', async () => {
+        await setHistorySortMode('recent');
     });
     
-    el.sortHotBtn.addEventListener('click', () => {
-        setHistorySortMode('hot');
+    el.sortHotBtn.addEventListener('click', async () => {
+        await setHistorySortMode('hot');
     });
     
     // 初始化排序状态
@@ -1458,7 +1391,7 @@ function bindEvents() {
 }
 
 // ========== 13. 初始化 ==========
-window.onload = () => {
+window.onload = async () => {
     // 初始化日志面板
     addLog('播放器开始初始化', 'info');
 
@@ -1487,11 +1420,42 @@ window.onload = () => {
     // 绑定所有事件
     bindEvents();
 
-    // 自动加载示例链接
-    const defaultUrl = el.urlInput.value.trim();
-    if (defaultUrl) {
-        const savedTime = getPlayPosition(defaultUrl);
-        loadVideo(defaultUrl, savedTime > 0);
+    // 处理 URL 参数，支持协议处理程序和 /play 路径
+    const urlParams = new URLSearchParams(window.location.search);
+    const protocolUrl = urlParams.get('url');
+    let videoUrl = '';
+    
+    // 处理 /play 路径，提取视频 URL
+    const pathname = window.location.pathname;
+    if (pathname === '/play') {
+        // 从查询参数中获取 URL
+        if (protocolUrl) {
+            videoUrl = protocolUrl;
+            el.urlInput.value = videoUrl;
+        } else {
+            // 如果没有查询参数，使用默认示例链接
+            videoUrl = el.urlInput.value.trim();
+        }
+    } else if (protocolUrl) {
+        // 处理从协议处理程序传入的 URL
+        // 如果 URL 包含协议前缀 web+video://，则提取真实 URL
+        if (protocolUrl.startsWith('web+video://')) {
+            // 提取真实 URL，移除协议前缀
+            videoUrl = protocolUrl.replace(/^web\+video:\/\//, 'https://');
+        } else {
+            videoUrl = protocolUrl;
+        }
+        
+        addLog(`从协议处理程序获取到视频 URL: ${videoUrl}`, 'info');
+        el.urlInput.value = videoUrl;
+    } else {
+        // 自动加载示例链接
+        videoUrl = el.urlInput.value.trim();
+    }
+    
+    if (videoUrl) {
+        const savedTime = await getPlayPosition(videoUrl);
+        loadVideo(videoUrl, savedTime > 0);
     }
 
     addLog('播放器初始化完成', 'success');

@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node ./server.js",
     "stop": "node ./server.js stop",
-    "serve": "serve -s . -l 3000",
-    "dev": "serve -s . -l 3000"
+    "serve": "serve -s . -l 3000 --single",
+    "dev": "serve -s . -l 3000 --single"
   },
   "keywords": [
     "m3u8",
