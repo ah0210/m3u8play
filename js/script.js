@@ -209,8 +209,7 @@ function hideLoading() {
 
 // ========== 8. 功能：缓存清理 ==========
 function clearCache() {
-    // 清除播放记录、倍速记忆、主题设置
-    localStorage.removeItem('videoPlayHistory');
+    // 清除倍速记忆、主题设置，保留播放记录
     localStorage.removeItem('playerPreferredSpeed');
     localStorage.removeItem('playerTheme');
     
@@ -218,8 +217,8 @@ function clearCache() {
     el.speedSelect.value = '1';
     el.video.playbackRate = 1;
     
-    showStatus(i18n[currentLang].statusSuccessClearCache, 'success');
-    addLog('已清理所有本地缓存（播放记录、倍速、主题）', 'success');
+    showStatus('本地缓存已清理（倍速、主题）', 'success');
+    addLog('已清理本地缓存（倍速、主题）', 'success');
 }
 
 // ========== 9. 功能：移动端触摸操作 ==========
