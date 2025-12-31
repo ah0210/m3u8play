@@ -24,6 +24,7 @@
 - ✅ 播放位置记忆
 - ✅ 断网自动重连
 - ✅ 倍速设置记忆
+- ✅ 播放历史记录（最多保存20条）
 - ✅ 主题切换（亮色/暗色）
 - ✅ 国际化支持（中文/英文）
 
@@ -61,22 +62,27 @@
 ### 方法二：本地服务器运行（推荐用于开发和调试）
 
 1. 确保已安装 Node.js
-2. 全局安装 `serve` 包：
+2. 进入项目目录：
    ```bash
-   npm install -g serve
+   cd e:\m3u8play
    ```
-3. 进入项目目录：
+3. 安装依赖（包括本地 `serve` 包）：
    ```bash
-   cd e:\live\m3u8play
+   npm install
    ```
 4. 启动本地服务器：
    ```bash
-   serve -l 8080
+   npm start
    ```
 5. 在浏览器中访问：
    ```
-   http://localhost:8080
+   http://localhost:3000
    ```
+
+或者使用 npx 直接运行（无需安装）：
+```bash
+npx serve -s . -l 3000
+```
 
 ### 方法三：部署到服务器
 
@@ -139,12 +145,26 @@
 ```
 m3u8play/
 ├── play.html          # 主播放器页面
+├── README.md          # 项目说明文档
+├── package.json       # 项目依赖配置
 ├── manifest.json      # PWA 配置文件
-├── service-worker.js  # 服务工作线程，负责离线缓存
-├── icons/             # 应用图标
-│   ├── README.md      # 图标生成说明
-│   └── icon.svg       # SVG 图标模板
-└── README.md          # 项目说明文档
+├── generate-icons.html # 图标生成页面
+├── generate-icons.js   # 图标生成脚本
+├── download-icons.html # 图标下载页面
+├── css/               # CSS 样式文件
+│   └── style.css      # 主样式文件
+├── js/                # JavaScript 文件
+│   ├── script.js      # 主播放器逻辑
+│   ├── i18n.js        # 国际化配置
+│   └── service-worker.js # 服务工作线程，负责离线缓存
+└── icons/             # 应用图标
+    ├── README.md      # 图标生成说明
+    ├── icon.svg       # SVG 图标模板
+    ├── icon-96x96.png    # 96x96 像素图标
+    ├── icon-192x192.png  # 192x192 像素图标
+    ├── icon-512x512.png  # 512x512 像素图标
+    ├── icon-maskable-192x192.png  # 192x192 像素遮罩图标
+    └── icon-maskable-512x512.png  # 512x512 像素遮罩图标
 ```
 
 ## 配置说明
@@ -223,6 +243,17 @@ A: 您可以通过 iframe 方式嵌入：
 
 ## 更新日志
 
+### v1.1.0 (2025-12-31)
+- ✅ 新增播放历史记录功能（最多保存20条）
+- ✅ 支持查看和管理播放历史
+- ✅ 点击历史记录可直接播放视频
+- ✅ 支持删除单条或清空所有历史记录
+- ✅ 历史记录包含播放进度、时长和日期
+- ✅ 添加了package.json，支持本地serve依赖
+- ✅ 优化了控制按钮样式和交互
+- ✅ 文字提示默认隐藏，鼠标悬停时显示
+- ✅ 控制图标旁文字显示在按钮上方
+
 ### v1.0.0 (2025-12-30)
 - ✅ 初始版本发布
 - ✅ 支持 M3U8 和 MP4 格式
@@ -237,8 +268,8 @@ A: 您可以通过 iframe 方式嵌入：
 
 如有问题或建议，欢迎通过以下方式联系：
 
-- 提交 Issue：[GitHub Issues](https://github.com/yourusername/m3u8player/issues)（示例）
-- 邮箱：your-email@example.com（示例）
+- 提交 Issue：[GitHub Issues](https://github.com/ah0210/m3u8play/issues)
+- 邮箱：163828@qq.com
 
 ---
 
