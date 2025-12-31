@@ -14,6 +14,130 @@ body.dark {
     color: #e0e0e0;
 }
 
+/* 主布局 */
+.main-layout {
+    display: flex;
+    gap: 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* 播放器区域 */
+.player-area {
+    flex: 1;
+    min-width: 0;
+}
+
+/* 侧边栏 - 优化：真正隐藏，不挤占播放页面 */
+.sidebar {
+    width: 350px;
+    background: #fff;
+    border-radius: 8px 0 0 8px;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    transform: translateX(100%);
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    display: block;
+    pointer-events: none;
+}
+
+.sidebar.show {
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+/* 确保播放区域不受侧边栏影响 */
+.player-area {
+    transition: none;
+    min-width: 0;
+    flex: 1;
+}
+
+.main-layout {
+    position: relative;
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+}
+
+/* 修复播放器对齐样式 */
+body.player-align-left .player-wrap {
+    margin: 0 0 0 0 !important;
+}
+
+body.player-align-center .player-wrap {
+    margin: 0 auto !important;
+}
+
+body.player-align-right .player-wrap {
+    margin: 0 0 0 auto !important;
+}
+
+/* 侧边栏切换按钮 - 优化：播放器内右侧，半透明缩小 */
+.sidebar-toggle {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    z-index: 1001;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    backdrop-filter: blur(5px);
+}
+
+.sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+/* 侧边栏历史面板 */
+.history-sidebar {
+    margin: 0;
+    border-radius: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-sidebar .log-body {
+    flex: 1;
+    overflow-y: auto;
+    max-height: none;
+}
+
+/* 暗色主题适配 */
+body.dark .sidebar {
+    background: #1e1e1e;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+body.dark .sidebar-toggle {
+    background: #3367d6;
+    box-shadow: -2px 2px 5px rgba(0,0,0,0.3);
+}
+
+body.dark .sidebar-toggle:hover {
+    background: #2a56c6;
+}
+
 /* 播放器容器 */
 .player-wrap {
     max-width: 1200px;
@@ -562,13 +686,45 @@ body.dark .log-panel {
 }
 
 .sort-btn {
-    padding: 4px 8px;
+    position: relative;
+    padding: 6px 10px;
     border: 1px solid #333;
     border-radius: 4px;
     cursor: pointer;
     font-size: 11px;
     transition: all 0.2s ease;
     background: transparent;
+    min-width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* 悬停文字显示效果 */
+.sort-btn::after {
+    content: attr(data-text);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    margin-bottom: 5px;
+    z-index: 1000;
+}
+
+.sort-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
 }
 
 body.light .sort-btn {
@@ -637,6 +793,7 @@ body.dark .log-item {
     color: #2e7d32;
 }
 .log-clear {
+    position: relative;
     font-size: 11px;
     padding: 4px 8px;
     border: none;
@@ -644,6 +801,37 @@ body.dark .log-item {
     cursor: pointer;
     background: #ddd;
     color: #333;
+    min-width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* 悬停文字显示效果 */
+.log-clear::after {
+    content: attr(data-text);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    margin-bottom: 5px;
+    z-index: 1000;
+}
+
+.log-clear:hover::after {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* 播放历史项样式 */

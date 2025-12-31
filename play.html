@@ -31,122 +31,165 @@
     <link rel="shortcut icon" href="./icons/icon-192x192.png">
 </head>
 <body class="light">
-    <div class="player-wrap">
-        <!-- 视频区域 + 加载遮罩 + 触摸提示 -->
-        <div class="video-container">
-            <video id="video-player"></video>
-            <div class="loading-mask" id="loading-mask">
-                <div class="spinner"></div>
-                <span id="loading-text">加载中...</span>
+    <div class="main-layout">
+        <!-- 播放器区域 -->
+        <div class="player-area">
+            <div class="player-wrap">
+                <!-- 视频区域 + 加载遮罩 + 触摸提示 -->
+                <div class="video-container">
+                    <video id="video-player"></video>
+                    <div class="loading-mask" id="loading-mask">
+                        <div class="spinner"></div>
+                        <span id="loading-text">加载中...</span>
+                    </div>
+                    <div class="touch-tip" id="touch-tip">双击播放/暂停</div>
+                    <div class="status-tip" id="status-tip"></div>
+                </div>
+
+                <!-- 自定义控制栏 -->
+                <div class="custom-controls">
+                    <!-- 第一行：链接输入 + 基础控制 + 语言/主题 -->
+                    <div class="control-row">
+                        <div class="url-input-wrapper">
+                            <input type="text" id="url-input" placeholder="输入 m3u8/MP4 链接" 
+                                   value="https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u8">
+                            <button type="button" id="url-clear-btn" class="url-clear-btn" title="清除">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <button class="control-btn" id="load-play-btn">
+                            <i class="fas fa-play"></i> <span id="load-play-text">加载播放</span>
+                        </button>
+                        <button class="control-btn" id="pause-btn" disabled>
+                            <i class="fas fa-pause"></i> <span>暂停</span>
+                        </button>
+                        <button class="control-btn" id="fullscreen-btn" disabled>
+                            <i class="fas fa-expand"></i> <span>全屏</span>
+                        </button>
+                        <button class="control-btn" id="pip-btn" disabled>
+                            <i class="fas fa-expand-arrows-alt"></i> <span>画中画</span>
+                        </button>
+                        <button class="control-btn" id="screenshot-btn" disabled>
+                            <i class="fas fa-camera"></i> <span>截图</span>
+                        </button>
+                        <button class="control-btn" id="shortcut-btn">
+                            <i class="fas fa-keyboard"></i> <span>快捷键</span>
+                        </button>
+                        <button class="control-btn" id="clear-cache-btn">
+                            <i class="fas fa-trash"></i> <span>清理缓存</span>
+                        </button>
+                        <button class="control-btn" id="history-btn">
+                            <i class="fas fa-history"></i> <span>播放历史</span>
+                        </button>
+                        
+                        <!-- 语言选择 -->
+                        <div class="control-group">
+                            <span id="langLabel">语言</span>
+                            <select class="select-control" id="lang-select">
+                                <option value="zh-CN" selected>中文</option>
+                                <option value="en-US">English</option>
+                            </select>
+                        </div>
+
+                        <!-- 主题选择 -->
+                        <div class="control-group">
+                            <span id="themeLabel">主题</span>
+                            <select class="select-control" id="theme-select">
+                                <option value="light" selected>亮色</option>
+                                <option value="dark">暗色</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 第二行：进度条 + 扩展控制 -->
+                    <div class="control-row">
+                        <!-- 进度条 -->
+                        <div class="progress-wrap" id="progress-wrap">
+                            <div class="progress-loaded" id="progress-loaded"></div>
+                            <div class="progress-bar" id="progress-bar"></div>
+                        </div>
+
+                        <!-- 音量控制 -->
+                        <div class="volume-wrap">
+                            <i class="fas fa-volume-up" id="volume-icon"></i>
+                            <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="1">
+                        </div>
+
+                        <!-- 倍速选择 -->
+                        <div class="control-group">
+                            <span id="speedLabel">倍速</span>
+                            <select class="select-control" id="speed-select">
+                                <option value="0.5">0.5x</option>
+                                <option value="0.75">0.75x</option>
+                                <option value="1" selected>1x</option>
+                                <option value="1.25">1.25x</option>
+                                <option value="1.5">1.5x</option>
+                                <option value="2">2x</option>
+                            </select>
+                        </div>
+
+                        <!-- 画质选择（仅 m3u8 可用） -->
+                        <div class="control-group">
+                            <span id="qualityLabel">画质</span>
+                            <select class="select-control" id="quality-select" disabled>
+                                <option value="">自动</option>
+                            </select>
+                        </div>
+
+                        <!-- 对齐方式选择 -->
+                        <div class="control-group">
+                            <span id="alignLabel">对齐</span>
+                            <div class="align-controls">
+                                <button class="align-btn" id="align-left" title="左对齐" data-align="left">
+                                    <i class="fas fa-align-left"></i>
+                                </button>
+                                <button class="align-btn" id="align-center" title="居中对齐" data-align="center">
+                                    <i class="fas fa-align-center"></i>
+                                </button>
+                                <button class="align-btn active" id="align-right" title="右对齐" data-align="right">
+                                    <i class="fas fa-align-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="touch-tip" id="touch-tip">双击播放/暂停</div>
-            <div class="status-tip" id="status-tip"></div>
         </div>
 
-        <!-- 自定义控制栏 -->
-        <div class="custom-controls">
-            <!-- 第一行：链接输入 + 基础控制 + 语言/主题 -->
-            <div class="control-row">
-                <div class="url-input-wrapper">
-                    <input type="text" id="url-input" placeholder="输入 m3u8/MP4 链接" 
-                           value="https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u8">
-                    <button type="button" id="url-clear-btn" class="url-clear-btn" title="清除">
-                        <i class="fas fa-times"></i>
+        <!-- 侧边栏切换按钮 -->
+        <button class="sidebar-toggle" id="sidebar-toggle" title="切换历史记录">
+            <i class="fas fa-history"></i>
+        </button>
+
+        <!-- 历史记录侧边栏 -->
+        <div class="sidebar" id="sidebar">
+            <div class="log-panel history-sidebar" id="history-panel">
+                <div class="log-header" id="history-header">
+                    <span id="historyTitle">播放历史</span>
+                    <div class="history-header-actions">
+                        <div class="sort-controls">
+                    <span>排序：</span>
+                    <button class="sort-btn active" id="sort-recent" data-sort="recent" data-text="最新">
+                        <i class="fas fa-clock"></i>
+                    </button>
+                    <button class="sort-btn" id="sort-hot" data-sort="hot" data-text="热度">
+                        <i class="fas fa-fire"></i>
                     </button>
                 </div>
-                <button class="control-btn" id="load-play-btn">
-                    <i class="fas fa-play"></i> <span id="load-play-text">加载播放</span>
+                <button class="log-clear" id="history-export" data-text="导出历史">
+                    <i class="fas fa-download"></i>
                 </button>
-                <button class="control-btn" id="pause-btn" disabled>
-                    <i class="fas fa-pause"></i> <span>暂停</span>
+                <input type="file" id="history-import-input" accept=".json" style="display: none;">
+                <button class="log-clear" id="history-import" data-text="导入历史">
+                    <i class="fas fa-upload"></i>
                 </button>
-                <button class="control-btn" id="fullscreen-btn" disabled>
-                    <i class="fas fa-expand"></i> <span>全屏</span>
+                <button class="log-clear" id="history-clear" data-text="清空历史">
+                    <i class="fas fa-trash"></i>
                 </button>
-                <button class="control-btn" id="pip-btn" disabled>
-                    <i class="fas fa-expand-arrows-alt"></i> <span>画中画</span>
-                </button>
-                <button class="control-btn" id="screenshot-btn" disabled>
-                    <i class="fas fa-camera"></i> <span>截图</span>
-                </button>
-                <button class="control-btn" id="shortcut-btn">
-                    <i class="fas fa-keyboard"></i> <span>快捷键</span>
-                </button>
-                <button class="control-btn" id="clear-cache-btn">
-                    <i class="fas fa-trash"></i> <span>清理缓存</span>
-                </button>
-                <button class="control-btn" id="history-btn">
-                    <i class="fas fa-history"></i> <span>播放历史</span>
-                </button>
-                
-                <!-- 语言选择 -->
-                <div class="control-group">
-                    <span id="langLabel">语言</span>
-                    <select class="select-control" id="lang-select">
-                        <option value="zh-CN" selected>中文</option>
-                        <option value="en-US">English</option>
-                    </select>
-                </div>
-
-                <!-- 主题选择 -->
-                <div class="control-group">
-                    <span id="themeLabel">主题</span>
-                    <select class="select-control" id="theme-select">
-                        <option value="light" selected>亮色</option>
-                        <option value="dark">暗色</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- 第二行：进度条 + 扩展控制 -->
-            <div class="control-row">
-                <!-- 进度条 -->
-                <div class="progress-wrap" id="progress-wrap">
-                    <div class="progress-loaded" id="progress-loaded"></div>
-                    <div class="progress-bar" id="progress-bar"></div>
-                </div>
-
-                <!-- 音量控制 -->
-                <div class="volume-wrap">
-                    <i class="fas fa-volume-up" id="volume-icon"></i>
-                    <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="1">
-                </div>
-
-                <!-- 倍速选择 -->
-                <div class="control-group">
-                    <span id="speedLabel">倍速</span>
-                    <select class="select-control" id="speed-select">
-                        <option value="0.5">0.5x</option>
-                        <option value="0.75">0.75x</option>
-                        <option value="1" selected>1x</option>
-                        <option value="1.25">1.25x</option>
-                        <option value="1.5">1.5x</option>
-                        <option value="2">2x</option>
-                    </select>
-                </div>
-
-                <!-- 画质选择（仅 m3u8 可用） -->
-                <div class="control-group">
-                    <span id="qualityLabel">画质</span>
-                    <select class="select-control" id="quality-select" disabled>
-                        <option value="">自动</option>
-                    </select>
-                </div>
-
-                <!-- 对齐方式选择 -->
-                <div class="control-group">
-                    <span id="alignLabel">对齐</span>
-                    <div class="align-controls">
-                        <button class="align-btn" id="align-left" title="左对齐" data-align="left">
-                            <i class="fas fa-align-left"></i>
-                        </button>
-                        <button class="align-btn" id="align-center" title="居中对齐" data-align="center">
-                            <i class="fas fa-align-center"></i>
-                        </button>
-                        <button class="align-btn active" id="align-right" title="右对齐" data-align="right">
-                            <i class="fas fa-align-right"></i>
-                        </button>
                     </div>
+                </div>
+                <div class="log-body" id="history-body">
+                    <div class="history-empty" id="history-empty">暂无播放历史</div>
                 </div>
             </div>
         </div>
@@ -174,27 +217,6 @@
             <li><span class="key">P</span><span id="shortcutPip">画中画/退出</span></li>
             <li><span class="key">S</span><span id="shortcutScreenshot">截图</span></li>
         </ul>
-    </div>
-
-    <!-- 播放历史面板 -->
-    <div class="log-panel" id="history-panel">
-        <div class="log-header" id="history-header">
-            <span id="historyTitle">播放历史</span>
-            <div class="history-header-actions">
-                <div class="sort-controls">
-                    <span>排序：</span>
-                    <button class="sort-btn active" id="sort-recent" data-sort="recent">最新</button>
-                    <button class="sort-btn" id="sort-hot" data-sort="hot">热度</button>
-                </div>
-                <button class="log-clear" id="history-export">导出历史</button>
-                <input type="file" id="history-import-input" accept=".json" style="display: none;">
-                <button class="log-clear" id="history-import">导入历史</button>
-                <button class="log-clear" id="history-clear">清空历史</button>
-            </div>
-        </div>
-        <div class="log-body" id="history-body">
-            <div class="history-empty" id="history-empty">暂无播放历史</div>
-        </div>
     </div>
 
     <!-- 日志面板 -->

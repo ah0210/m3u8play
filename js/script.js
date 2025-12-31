@@ -95,7 +95,10 @@ const el = {
     logHeader: document.getElementById('log-header'),
     logBody: document.getElementById('log-body'),
     logTitle: document.getElementById('logTitle'),
-    logClear: document.getElementById('log-clear')
+    logClear: document.getElementById('log-clear'),
+    // 侧边栏
+    sidebar: document.getElementById('sidebar'),
+    sidebarToggle: document.getElementById('sidebar-toggle')
 };
 
 let hls = null;
@@ -452,7 +455,38 @@ function savePlayHistory(url, time = 0) {
     const maxHistory = 120;
     
     // 获取现有历史记录
-    const historyList = JSON.parse(localStorage.getItem(historyKey) || '[]');
+    let historyList = JSON.parse(localStorage.getItem(historyKey) || '[]');
+    
+    // 如果历史记录为空，添加一些测试数据
+    if (historyList.length === 0) {
+        historyList = [
+            {
+                url: 'https://example.com/video1.mp4',
+                title: '测试视频1',
+                time: 0,
+                duration: 3600,
+                date: new Date().toISOString(),
+                playCount: 5
+            },
+            {
+                url: 'https://example.com/video2.m3u8',
+                title: '测试视频2',
+                time: 120,
+                duration: 2400,
+                date: new Date(Date.now() - 86400000).toISOString(),
+                playCount: 10
+            },
+            {
+                url: 'https://example.com/video3.mp4',
+                title: '测试视频3',
+                time: 60,
+                duration: 1800,
+                date: new Date(Date.now() - 172800000).toISOString(),
+                playCount: 3
+            }
+        ];
+        localStorage.setItem(historyKey, JSON.stringify(historyList));
+    }
     
     // 查找是否已存在该记录
     const existingIndex = historyList.findIndex(item => item.url === url);
@@ -1257,8 +1291,16 @@ function bindEvents() {
 
     // 播放历史
     el.historyBtn.addEventListener('click', () => {
-        el.historyBody.classList.toggle('show');
+        el.sidebar.classList.toggle('show');
         renderPlayHistory();
+        addLog('切换历史记录侧边栏', 'info');
+    });
+
+    // 侧边栏切换按钮
+    el.sidebarToggle.addEventListener('click', () => {
+        el.sidebar.classList.toggle('show');
+        renderPlayHistory();
+        addLog('切换历史记录侧边栏', 'info');
     });
 
     el.historyHeader.addEventListener('click', () => {
