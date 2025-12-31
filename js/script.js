@@ -109,6 +109,8 @@ let shortcutTimer = null;
 let touchTimer = null;
 let currentLang = 'zh-CN';
 let currentTheme = 'light';
+let saveHistoryTimer = null; // 保存历史记录的防抖定时器
+const SAVE_HISTORY_DELAY = 2000; // 防抖延迟时间（毫秒）
 
 // ========== 3. 工具函数：国际化 ==========
 function updateI18n(lang) {
@@ -450,86 +452,93 @@ function handleNetworkStatus() {
 function savePlayHistory(url, time = 0) {
     if (!url) return;
     
-    const historyKey = 'videoPlayHistoryList';
-    const maxHistory = 120;
+    // 使用防抖机制，避免频繁写入
+    if (saveHistoryTimer) {
+        clearTimeout(saveHistoryTimer);
+    }
     
-    // 获取现有历史记录
-    let historyList = JSON.parse(localStorage.getItem(historyKey) || '[]');
-    
-    // 如果历史记录为空，添加一些测试数据
-    if (historyList.length === 0) {
-        historyList = [
-            {
-                url: 'https://example.com/video1.mp4',
-                title: '测试视频1',
-                time: 0,
-                duration: 3600,
+    saveHistoryTimer = setTimeout(() => {
+        const historyKey = 'videoPlayHistoryList';
+        const maxHistory = 120;
+        
+        // 获取现有历史记录
+        let historyList = JSON.parse(localStorage.getItem(historyKey) || '[]');
+        
+        // 如果历史记录为空，添加一些测试数据
+        if (historyList.length === 0) {
+            historyList = [
+                {
+                    url: 'https://example.com/video1.mp4',
+                    title: '测试视频1',
+                    time: 0,
+                    duration: 3600,
+                    date: new Date().toISOString(),
+                    playCount: 5
+                },
+                {
+                    url: 'https://example.com/video2.m3u8',
+                    title: '测试视频2',
+                    time: 120,
+                    duration: 2400,
+                    date: new Date(Date.now() - 86400000).toISOString(),
+                    playCount: 10
+                },
+                {
+                    url: 'https://example.com/video3.mp4',
+                    title: '测试视频3',
+                    time: 60,
+                    duration: 1800,
+                    date: new Date(Date.now() - 172800000).toISOString(),
+                    playCount: 3
+                }
+            ];
+            localStorage.setItem(historyKey, JSON.stringify(historyList));
+        }
+        
+        // 查找是否已存在该记录
+        const existingIndex = historyList.findIndex(item => item.url === url);
+        let updatedList;
+        
+        if (existingIndex !== -1) {
+            // 如果存在，更新记录
+            const existingItem = historyList[existingIndex];
+            const updatedItem = {
+                ...existingItem,
+                time: Math.round(time),
+                duration: Math.round(el.video.duration || 0),
                 date: new Date().toISOString(),
-                playCount: 5
-            },
-            {
-                url: 'https://example.com/video2.m3u8',
-                title: '测试视频2',
-                time: 120,
-                duration: 2400,
-                date: new Date(Date.now() - 86400000).toISOString(),
-                playCount: 10
-            },
-            {
-                url: 'https://example.com/video3.mp4',
-                title: '测试视频3',
-                time: 60,
-                duration: 1800,
-                date: new Date(Date.now() - 172800000).toISOString(),
-                playCount: 3
-            }
-        ];
-        localStorage.setItem(historyKey, JSON.stringify(historyList));
-    }
-    
-    // 查找是否已存在该记录
-    const existingIndex = historyList.findIndex(item => item.url === url);
-    let updatedList;
-    
-    if (existingIndex !== -1) {
-        // 如果存在，更新记录
-        const existingItem = historyList[existingIndex];
-        const updatedItem = {
-            ...existingItem,
-            time: Math.round(time),
-            duration: Math.round(el.video.duration || 0),
-            date: new Date().toISOString(),
-            playCount: (existingItem.playCount || 0) + 1 // 增加播放次数
-        };
+                playCount: (existingItem.playCount || 0) + 1 // 增加播放次数
+            };
+            
+            // 移除旧记录
+            const filteredList = historyList.filter((_, index) => index !== existingIndex);
+            // 添加更新后的记录到开头
+            updatedList = [updatedItem, ...filteredList];
+        } else {
+            // 如果不存在，创建新记录
+            const historyItem = {
+                url: url,
+                title: url.split('/').pop().split('?')[0] || '未命名视频',
+                time: Math.round(time),
+                duration: Math.round(el.video.duration || 0),
+                date: new Date().toISOString(),
+                playCount: 1 // 初始播放次数为1
+            };
+            
+            // 添加到历史记录开头
+            updatedList = [historyItem, ...historyList];
+        }
         
-        // 移除旧记录
-        const filteredList = historyList.filter((_, index) => index !== existingIndex);
-        // 添加更新后的记录到开头
-        updatedList = [updatedItem, ...filteredList];
-    } else {
-        // 如果不存在，创建新记录
-        const historyItem = {
-            url: url,
-            title: url.split('/').pop().split('?')[0] || '未命名视频',
-            time: Math.round(time),
-            duration: Math.round(el.video.duration || 0),
-            date: new Date().toISOString(),
-            playCount: 1 // 初始播放次数为1
-        };
+        // 限制最大记录数
+        updatedList = updatedList.slice(0, maxHistory);
         
-        // 添加到历史记录开头
-        updatedList = [historyItem, ...historyList];
-    }
-    
-    // 限制最大记录数
-    updatedList = updatedList.slice(0, maxHistory);
-    
-    // 保存到本地存储
-    localStorage.setItem(historyKey, JSON.stringify(updatedList));
-    addLog(`保存播放历史：${url}`, 'info');
-    
-    // 更新历史记录面板
-    renderPlayHistory();
+        // 保存到本地存储
+        localStorage.setItem(historyKey, JSON.stringify(updatedList));
+        addLog(`保存播放历史：${url}`, 'info');
+        
+        // 更新历史记录面板
+        renderPlayHistory();
+    }, SAVE_HISTORY_DELAY);
 }
 
 // 获取播放历史列表
@@ -1419,9 +1428,32 @@ function bindEvents() {
     window.addEventListener('beforeunload', () => {
         if (currentVideoUrl) {
             savePlayPosition(currentVideoUrl, el.video.currentTime);
+            // 页面关闭时立即保存播放历史，不使用防抖
+            savePlayHistory(currentVideoUrl, el.video.currentTime);
         }
         savePlaybackSpeed(el.video.playbackRate);
         addLog('页面即将关闭，保存播放状态', 'info');
+    });
+    
+    // 视频结束时保存播放历史
+    el.video.addEventListener('ended', () => {
+        if (currentVideoUrl) {
+            savePlayHistory(currentVideoUrl, el.video.duration);
+        }
+    });
+    
+    // 视频切换时保存播放历史
+    el.loadPlayBtn.addEventListener('click', () => {
+        if (currentVideoUrl) {
+            savePlayHistory(currentVideoUrl, el.video.currentTime);
+        }
+    });
+    
+    // 暂停时保存播放历史
+    el.pauseBtn.addEventListener('click', () => {
+        if (currentVideoUrl) {
+            savePlayHistory(currentVideoUrl, el.video.currentTime);
+        }
     });
 }
 
