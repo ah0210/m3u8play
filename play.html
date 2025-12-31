@@ -46,8 +46,13 @@
         <div class="custom-controls">
             <!-- 第一行：链接输入 + 基础控制 + 语言/主题 -->
             <div class="control-row">
-                <input type="text" id="url-input" placeholder="输入 m3u8/MP4 链接" 
-                       value="https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u8">
+                <div class="url-input-wrapper">
+                    <input type="text" id="url-input" placeholder="输入 m3u8/MP4 链接" 
+                           value="https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u8">
+                    <button type="button" id="url-clear-btn" class="url-clear-btn" title="清除">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
                 <button class="control-btn" id="load-play-btn">
                     <i class="fas fa-play"></i> <span id="load-play-text">加载播放</span>
                 </button>

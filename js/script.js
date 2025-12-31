@@ -35,6 +35,7 @@ const el = {
     loadingText: document.getElementById('loading-text'),
     statusTip: document.getElementById('status-tip'),
     urlInput: document.getElementById('url-input'),
+    urlClearBtn: document.getElementById('url-clear-btn'),
     loadPlayBtn: document.getElementById('load-play-btn'),
     loadPlayText: document.getElementById('load-play-text'),
     pauseBtn: document.getElementById('pause-btn'),
@@ -1026,6 +1027,28 @@ function bindEvents() {
     // 回车加载
     el.urlInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') el.loadPlayBtn.click();
+    });
+
+    // URL 输入框清除按钮
+    function updateUrlClearBtnVisibility() {
+        if (el.urlInput.value.trim()) {
+            el.urlClearBtn.classList.add('visible');
+        } else {
+            el.urlClearBtn.classList.remove('visible');
+        }
+    }
+
+    // 初始检查
+    updateUrlClearBtnVisibility();
+
+    // 输入时更新
+    el.urlInput.addEventListener('input', updateUrlClearBtnVisibility);
+
+    // 清除按钮点击事件
+    el.urlClearBtn.addEventListener('click', () => {
+        el.urlInput.value = '';
+        updateUrlClearBtnVisibility();
+        el.urlInput.focus();
     });
 
     // 语言切换
