@@ -957,7 +957,7 @@ async function loadVideo(url, restorePosition = false) {
         
         // 验证URL是否合法
         if (!isValidVideoUrl(trimmedUrl)) {
-            showStatus('错误：请输入有效的视频URL', 'error');
+            showStatus('错误：请输入有效的视频URL（支持m3u8、mp4、webm、ogg、avi、mov、wmv格式）', 'error');
             addLog(`无效的视频URL：${trimmedUrl}`, 'error');
             return;
         }
@@ -1577,20 +1577,6 @@ function bindEvents() {
     el.video.addEventListener('ended', () => {
         if (currentVideoUrl) {
             savePlayHistory(currentVideoUrl, el.video.duration);
-        }
-    });
-    
-    // 视频切换时保存播放历史
-    el.loadPlayBtn.addEventListener('click', () => {
-        if (currentVideoUrl) {
-            savePlayHistory(currentVideoUrl, el.video.currentTime);
-        }
-    });
-    
-    // 暂停时保存播放历史
-    el.pauseBtn.addEventListener('click', () => {
-        if (currentVideoUrl) {
-            savePlayHistory(currentVideoUrl, el.video.currentTime);
         }
     });
 }
