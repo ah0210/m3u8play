@@ -69,6 +69,9 @@
                 <button class="control-btn" id="clear-cache-btn">
                     <i class="fas fa-trash"></i> <span>清理缓存</span>
                 </button>
+                <button class="control-btn" id="history-btn">
+                    <i class="fas fa-history"></i> <span>播放历史</span>
+                </button>
                 
                 <!-- 语言选择 -->
                 <div class="control-group">
@@ -163,7 +166,19 @@
         <div class="log-body" id="log-body"></div>
     </div>
 
+    <!-- 播放历史面板 -->
+    <div class="log-panel" id="history-panel">
+        <div class="log-header" id="history-header">
+            <span id="historyTitle">播放历史</span>
+            <button class="log-clear" id="history-clear">清空历史</button>
+        </div>
+        <div class="log-body" id="history-body">
+            <div class="history-empty" id="history-empty">暂无播放历史</div>
+        </div>
+    </div>
+
     <!-- 引入外部JavaScript文件 -->
+    <script src="./js/i18n.js"></script>
     <script src="./js/script.js"></script>
 </body>
 </html>

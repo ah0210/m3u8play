@@ -98,12 +98,18 @@ body.dark .custom-controls {
     align-items: center;
 }
 .control-btn {
-    padding: 8px 16px;
+    padding: 6px 10px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     transition: background 0.2s;
+    position: relative;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 body.light .control-btn {
     background: #4285f4;
@@ -459,6 +465,123 @@ body.dark .log-item {
     color: #333;
 }
 
+/* 播放历史项样式 */
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s ease;
+}
+
+body.dark .history-item {
+    border-bottom: 1px solid #444;
+}
+
+.history-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark .history-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.history-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-item-title {
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-item-meta {
+    font-size: 11px;
+    color: #888;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+body.dark .history-item-meta {
+    color: #aaa;
+}
+
+.history-item-url {
+    font-size: 10px;
+    color: #666;
+    word-break: break-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.dark .history-item-url {
+    color: #888;
+}
+
+.history-item-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: 10px;
+}
+
+.history-item-play,
+.history-item-delete {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 10px;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.history-item-play {
+    background: #4285f4;
+    color: white;
+}
+
+body.light .history-item-play:hover {
+    background: #3367d6;
+}
+
+body.dark .history-item-play:hover {
+    background: #3c78e7;
+}
+
+.history-item-delete {
+    background: #f44336;
+    color: white;
+}
+
+body.light .history-item-delete:hover {
+    background: #d32f2f;
+}
+
+body.dark .history-item-delete:hover {
+    background: #e53935;
+}
+
+.history-empty {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 20px 0;
+}
+
+body.dark .history-empty {
+    color: #aaa;
+}
+
 /* 移动端触摸提示 */
 .touch-tip {
     position: absolute;
@@ -495,16 +618,44 @@ body.dark .log-item {
     transition: transform 0.2s, background 0.2s;
 }
 
+/* 隐藏控制图标旁的文字，鼠标放置时显示在按钮上方 */
+.control-btn span {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    white-space: nowrap;
+    margin-bottom: 5px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.control-btn:hover span {
+    opacity: 1;
+}
+
 /* 加载/播放按钮样式 */
 #load-play-btn {
     background: #4285f4;
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 6px 10px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     transition: background 0.2s;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 body.light #load-play-btn:hover {

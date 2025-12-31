@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下载播放器图标</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .icon-item {
+            text-align: center;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .icon-preview {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+            display: block;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3367d6;
+        }
+        .instructions {
+            background: #e8f0fe;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #4285f4;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>M3U8/MP4 播放器图标下载</h1>
+        
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ol>
+                <li>点击下方的「下载」按钮下载图标</li>
+                <li>或者右键点击图标，选择「另存为」保存图片</li>
+                <li>将所有图标保存到 <strong>icons</strong> 文件夹中</li>
+                <li>确保文件名与下方显示的完全一致</li>
+            </ol>
+        </div>
+
+        <div class="icon-grid">
+            <!-- 96x96 图标 -->
+            <div class="icon-item">
+                <h3>96x96</h3>
+                <svg id="icon-96" class="icon-preview" xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 512 512">
+                    <defs>
+                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#3367d6;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="512" height="512" rx="128" fill="url(#grad1)" />
+                    <path d="M400 256L144 128v256z" fill="white" opacity="0.9" />
+                    <circle cx="256" cy="256" r="64" fill="white" opacity="0.8" />
+                    <text x="256" y="280" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">P</text>
+                </svg>
+                <p>文件名: icon-96x96.png</p>
+                <button onclick="downloadIcon('icon-96', 'icon-96x96.png')">下载</button>
+            </div>
+
+            <!-- 192x192 图标 -->
+            <div class="icon-item">
+                <h3>192x192</h3>
+                <svg id="icon-192" class="icon-preview" xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512">
+                    <defs>
+                        <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#3367d6;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="512" height="512" rx="128" fill="url(#grad2)" />
+                    <path d="M400 256L144 128v256z" fill="white" opacity="0.9" />
+                    <circle cx="256" cy="256" r="64" fill="white" opacity="0.8" />
+                    <text x="256" y="280" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">P</text>
+                </svg>
+                <p>文件名: icon-192x192.png</p>
+                <button onclick="downloadIcon('icon-192', 'icon-192x192.png')">下载</button>
+            </div>
+
+            <!-- 192x192 可遮罩图标 -->
+            <div class="icon-item">
+                <h3>192x192 可遮罩</h3>
+                <svg id="icon-maskable-192" class="icon-preview" xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512">
+                    <defs>
+                        <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#3367d6;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="512" height="512" rx="64" fill="url(#grad3)" />
+                    <path d="M380 246L164 138v236z" fill="white" opacity="0.9" />
+                    <circle cx="256" cy="256" r="60" fill="white" opacity="0.8" />
+                    <text x="256" y="276" font-family="Arial, sans-serif" font-size="46" font-weight="bold" fill="white" text-anchor="middle">P</text>
+                </svg>
+                <p>文件名: icon-maskable-192x192.png</p>
+                <button onclick="downloadIcon('icon-maskable-192', 'icon-maskable-192x192.png')">下载</button>
+            </div>
+
+            <!-- 512x512 图标 -->
+            <div class="icon-item">
+                <h3>512x512</h3>
+                <svg id="icon-512" class="icon-preview" xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+                    <defs>
+                        <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#3367d6;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="512" height="512" rx="128" fill="url(#grad4)" />
+                    <path d="M400 256L144 128v256z" fill="white" opacity="0.9" />
+                    <circle cx="256" cy="256" r="64" fill="white" opacity="0.8" />
+                    <text x="256" y="280" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">P</text>
+                </svg>
+                <p>文件名: icon-512x512.png</p>
+                <button onclick="downloadIcon('icon-512', 'icon-512x512.png')">下载</button>
+            </div>
+
+            <!-- 512x512 可遮罩图标 -->
+            <div class="icon-item">
+                <h3>512x512 可遮罩</h3>
+                <svg id="icon-maskable-512" class="icon-preview" xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+                    <defs>
+                        <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#3367d6;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="512" height="512" rx="64" fill="url(#grad5)" />
+                    <path d="M380 246L164 138v236z" fill="white" opacity="0.9" />
+                    <circle cx="256" cy="256" r="60" fill="white" opacity="0.8" />
+                    <text x="256" y="276" font-family="Arial, sans-serif" font-size="46" font-weight="bold" fill="white" text-anchor="middle">P</text>
+                </svg>
+                <p>文件名: icon-maskable-512x512.png</p>
+                <button onclick="downloadIcon('icon-maskable-512', 'icon-maskable-512x512.png')">下载</button>
+            </div>
+        </div>
+
+        <p style="text-align: center; margin-top: 30px; color: #666;">
+            🎉 所有图标已准备就绪，点击下载按钮保存到 icons 文件夹即可使用！
+        </p>
+    </div>
+
+    <script>
+        // SVG 转 PNG 并下载
+        function downloadIcon(svgId, filename) {
+            const svg = document.getElementById(svgId);
+            const serializer = new XMLSerializer();
+            const svgString = serializer.serializeToString(svg);
+            const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(svgBlob);
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                
+                // 转换为 PNG 并下载
+                const pngUrl = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngUrl;
+                downloadLink.download = filename;
+                downloadLink.click();
+                
+                URL.revokeObjectURL(url);
+                URL.revokeObjectURL(pngUrl);
+            };
+            
+            img.src = url;
+        }
+    </script>
+</body>
+</html>

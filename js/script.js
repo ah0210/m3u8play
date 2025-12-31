@@ -24,115 +24,8 @@ async function loadHlsJs() {
         throw error;
     }
 }
-// ========== 1. 国际化配置 ==========
-const i18n = {
-    'zh-CN': {
-        pageTitle: '终极版 M3U8/MP4 播放器',
-        langLabel: '语言',
-        themeLabel: '主题',
-        volumeLabel: '音量',
-        speedLabel: '倍速',
-        qualityLabel: '画质',
-        loadPlayBtn: '加载播放',
-        pauseBtn: '暂停',
-        fullscreenBtn: '全屏',
-        pipBtn: '画中画',
-        screenshotBtn: '截图',
-        shortcutBtn: '快捷键',
-        clearCacheBtn: '清理缓存',
-        urlInputPlaceholder: '输入 m3u8/MP4 链接',
-        loadingText: '加载中...',
-        statusSuccessLoad: '视频加载完成，可播放',
-        statusSuccessLoadNative: '视频加载完成（原生 HLS）',
-        statusSuccessPlay: '视频播放中',
-        statusSuccessPause: '视频已暂停',
-        statusSuccessEnd: '视频播放完毕',
-        statusSuccessFullscreen: '已进入全屏模式',
-        statusSuccessExitFullscreen: '已退出全屏模式',
-        statusSuccessPip: '已进入画中画模式',
-        statusSuccessExitPip: '已退出画中画模式',
-        statusSuccessSpeed: '已切换至 {speed} 倍速播放',
-        statusSuccessQuality: '已切换至 {quality} 画质',
-        statusSuccessScreenshot: '截图成功，可在弹窗中下载',
-        statusSuccessScreenshotDownload: '截图已下载',
-        statusSuccessClearCache: '缓存已清理完成',
-        statusErrorUrl: '错误：请输入有效的视频链接',
-        statusErrorLoad: '视频加载失败',
-        statusErrorNetwork: '错误：网络请求失败，请检查链接或网络',
-        statusErrorDecode: '错误：视频解码失败，格式不支持',
-        statusErrorUnknown: '错误：{msg}',
-        statusErrorVideo: '错误：{msg}',
-        statusErrorScreenshot: '截图失败：{msg}（可能受跨域限制）',
-        statusErrorPip: '{action}画中画失败：{msg}（需视频播放后操作）',
-        statusOffline: '⚠️ 网络已断开，将在恢复后自动重连',
-        statusReconnect: '网络恢复，正在重新加载视频...',
-        shortcutTitle: '快捷键说明',
-        shortcutPlay: '播放/暂停',
-        shortcutForward: '快进 5 秒',
-        shortcutBackward: '后退 5 秒',
-        shortcutVolUp: '音量+5%',
-        shortcutVolDown: '音量-5%',
-        shortcutFullscreen: '全屏/退出全屏',
-        shortcutPip: '画中画/退出',
-        shortcutScreenshot: '截图',
-        touchTip: '双击播放/暂停',
-        logTitle: '播放日志',
-        screenshotDownload: '下载截图'
-    },
-    'en-US': {
-        pageTitle: 'Ultimate M3U8/MP4 Player',
-        langLabel: 'Language',
-        themeLabel: 'Theme',
-        volumeLabel: 'Volume',
-        speedLabel: 'Speed',
-        qualityLabel: 'Quality',
-        loadPlayBtn: 'Load & Play',
-        pauseBtn: 'Pause',
-        fullscreenBtn: 'Fullscreen',
-        pipBtn: 'PiP',
-        screenshotBtn: 'Screenshot',
-        shortcutBtn: 'Shortcuts',
-        clearCacheBtn: 'Clear Cache',
-        urlInputPlaceholder: 'Enter m3u8/MP4 URL',
-        loadingText: 'Loading...',
-        statusSuccessLoad: 'Video loaded successfully, ready to play',
-        statusSuccessLoadNative: 'Video loaded (Native HLS)',
-        statusSuccessPlay: 'Video playing',
-        statusSuccessPause: 'Video paused',
-        statusSuccessEnd: 'Video playback completed',
-        statusSuccessFullscreen: 'Entered fullscreen mode',
-        statusSuccessExitFullscreen: 'Exited fullscreen mode',
-        statusSuccessPip: 'Entered picture-in-picture mode',
-        statusSuccessExitPip: 'Exited picture-in-picture mode',
-        statusSuccessSpeed: 'Switched to {speed}x playback speed',
-        statusSuccessQuality: 'Switched to {quality} quality',
-        statusSuccessScreenshot: 'Screenshot taken, download in popup',
-        statusSuccessScreenshotDownload: 'Screenshot downloaded',
-        statusSuccessClearCache: 'Cache cleared successfully',
-        statusErrorUrl: 'Error: Please enter a valid video URL',
-        statusErrorLoad: 'Video load failed',
-        statusErrorNetwork: 'Error: Network request failed, check URL or network',
-        statusErrorDecode: 'Error: Video decoding failed, format not supported',
-        statusErrorUnknown: 'Error: {msg}',
-        statusErrorVideo: 'Error: {msg}',
-        statusErrorScreenshot: 'Screenshot failed: {msg} (may be restricted by CORS)',
-        statusErrorPip: '{action} picture-in-picture failed: {msg} (operate after video plays)',
-        statusOffline: '⚠️ Network disconnected, auto-reconnect when restored',
-        statusReconnect: 'Network restored, reloading video...',
-        shortcutTitle: 'Shortcut Keys',
-        shortcutPlay: 'Play/Pause',
-        shortcutForward: 'Forward 5s',
-        shortcutBackward: 'Backward 5s',
-        shortcutVolUp: 'Volume +5%',
-        shortcutVolDown: 'Volume -5%',
-        shortcutFullscreen: 'Fullscreen/Exit',
-        shortcutPip: 'PiP/Exit',
-        shortcutScreenshot: 'Screenshot',
-        touchTip: 'Double tap to play/pause',
-        logTitle: 'Playback Log',
-        screenshotDownload: 'Download Screenshot'
-    }
-};
+// ========== 1. 使用外部国际化配置 ==========
+// 国际化配置已移至 i18n.js 文件，通过 window.i18n 访问
 
 // ========== 2. DOM 元素 & 全局变量 ==========
 const el = {
@@ -150,6 +43,13 @@ const el = {
     screenshotBtn: document.getElementById('screenshot-btn'),
     shortcutBtn: document.getElementById('shortcut-btn'),
     clearCacheBtn: document.getElementById('clear-cache-btn'),
+    historyBtn: document.getElementById('history-btn'),
+    historyPanel: document.getElementById('history-panel'),
+    historyHeader: document.getElementById('history-header'),
+    historyTitle: document.getElementById('historyTitle'),
+    historyClear: document.getElementById('history-clear'),
+    historyBody: document.getElementById('history-body'),
+    historyEmpty: document.getElementById('history-empty'),
     volumeIcon: document.getElementById('volume-icon'),
     progressWrap: document.getElementById('progress-wrap'),
     progressBar: document.getElementById('progress-bar'),
@@ -216,8 +116,11 @@ function updateI18n(lang) {
     if (el.screenshotBtn) el.screenshotBtn.innerHTML = `<i class="fas fa-camera"></i> <span>${langConfig.screenshotBtn}</span>`;
     if (el.shortcutBtn) el.shortcutBtn.innerHTML = `<i class="fas fa-keyboard"></i> <span>${langConfig.shortcutBtn}</span>`;
     if (el.clearCacheBtn) el.clearCacheBtn.innerHTML = `<i class="fas fa-trash"></i> <span>${langConfig.clearCacheBtn}</span>`;
+    if (el.historyBtn) el.historyBtn.innerHTML = `<i class="fas fa-history"></i> <span>${langConfig.historyBtn}</span>`;
     if (el.urlInput) el.urlInput.placeholder = langConfig.urlInputPlaceholder;
     if (el.shortcutTitle) el.shortcutTitle.textContent = langConfig.shortcutTitle;
+    if (el.historyTitle) el.historyTitle.textContent = langConfig.historyTitle;
+    if (el.historyClear) el.historyClear.textContent = langConfig.clearHistoryBtn;
     if (el.shortcutPlay) el.shortcutPlay.textContent = langConfig.shortcutPlay;
     if (el.shortcutForward) el.shortcutForward.textContent = langConfig.shortcutForward;
     if (el.shortcutBackward) el.shortcutBackward.textContent = langConfig.shortcutBackward;
@@ -532,17 +435,155 @@ function handleNetworkStatus() {
     }
 }
 
-// 记忆播放位置
+// 播放历史管理
+function savePlayHistory(url, time = 0) {
+    if (!url) return;
+    
+    const historyKey = 'videoPlayHistoryList';
+    const maxHistory = 20;
+    
+    // 获取现有历史记录
+    const historyList = JSON.parse(localStorage.getItem(historyKey) || '[]');
+    
+    // 移除重复项
+    const filteredList = historyList.filter(item => item.url !== url);
+    
+    // 创建新的历史记录项
+    const historyItem = {
+        url: url,
+        title: url.split('/').pop().split('?')[0] || '未命名视频',
+        time: Math.round(time),
+        duration: Math.round(el.video.duration || 0),
+        date: new Date().toISOString()
+    };
+    
+    // 添加到历史记录开头
+    const updatedList = [historyItem, ...filteredList].slice(0, maxHistory);
+    
+    // 保存到本地存储
+    localStorage.setItem(historyKey, JSON.stringify(updatedList));
+    addLog(`保存播放历史：${url}`, 'info');
+    
+    // 更新历史记录面板
+    renderPlayHistory();
+}
+
+// 获取播放历史列表
+function getPlayHistory() {
+    const historyKey = 'videoPlayHistoryList';
+    return JSON.parse(localStorage.getItem(historyKey) || '[]');
+}
+
+// 清空播放历史
+function clearPlayHistory() {
+    const historyKey = 'videoPlayHistoryList';
+    localStorage.removeItem(historyKey);
+    renderPlayHistory();
+    addLog('播放历史已清空', 'info');
+    showStatus('播放历史已清空', 'success');
+}
+
+// 渲染播放历史面板
+function renderPlayHistory() {
+    const historyList = getPlayHistory();
+    const historyBody = el.historyBody;
+    const historyEmpty = el.historyEmpty;
+    
+    // 清空现有内容
+    historyBody.innerHTML = '';
+    
+    if (historyList.length === 0) {
+        // 显示空状态
+        historyBody.appendChild(historyEmpty);
+        historyEmpty.style.display = 'block';
+    } else {
+        // 隐藏空状态
+        historyEmpty.style.display = 'none';
+        
+        // 渲染历史记录
+        historyList.forEach(item => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <div class="history-item-content">
+                    <div class="history-item-title">${item.title}</div>
+                    <div class="history-item-meta">
+                        <span class="history-item-date">${new Date(item.date).toLocaleString()}</span>
+                        <span class="history-item-time">播放至 ${formatTime(item.time)} / ${formatTime(item.duration)}</span>
+                    </div>
+                    <div class="history-item-url">${item.url}</div>
+                </div>
+                <div class="history-item-actions">
+                    <button class="history-item-play" title="播放" data-url="${item.url}">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="history-item-delete" title="删除" data-url="${item.url}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            historyBody.appendChild(historyItem);
+        });
+        
+        // 添加事件监听器
+        addHistoryItemListeners();
+    }
+}
+
+// 为历史记录项添加事件监听器
+function addHistoryItemListeners() {
+    // 播放按钮事件
+    document.querySelectorAll('.history-item-play').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const url = e.target.closest('.history-item-play').dataset.url;
+            el.urlInput.value = url;
+            loadVideo(url);
+        });
+    });
+    
+    // 删除按钮事件
+    document.querySelectorAll('.history-item-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const url = e.target.closest('.history-item-delete').dataset.url;
+            deleteHistoryItem(url);
+        });
+    });
+}
+
+// 删除单个历史记录项
+function deleteHistoryItem(url) {
+    const historyKey = 'videoPlayHistoryList';
+    const historyList = JSON.parse(localStorage.getItem(historyKey) || '[]');
+    const updatedList = historyList.filter(item => item.url !== url);
+    localStorage.setItem(historyKey, JSON.stringify(updatedList));
+    renderPlayHistory();
+    addLog(`删除播放历史：${url}`, 'info');
+}
+
+// 格式化时间（秒 -> mm:ss）
+function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// 记忆播放位置 - 保留原有功能，同时保存到播放历史
 function savePlayPosition(url, time) {
     if (!url || time < 5) return;
-    const playHistory = JSON.parse(localStorage.getItem('videoPlayHistory') || '{}');
-    playHistory[url] = time;
-    localStorage.setItem('videoPlayHistory', JSON.stringify(playHistory));
+    
+    // 保存播放位置到播放历史
+    savePlayHistory(url, time);
+    
     addLog(`保存播放位置：${url} -> ${Math.round(time)}秒`, 'info');
 }
+
+// 获取播放位置 - 保留原有功能
 function getPlayPosition(url) {
-    const playHistory = JSON.parse(localStorage.getItem('videoPlayHistory') || '{}');
-    const time = playHistory[url] || 0;
+    const historyList = getPlayHistory();
+    const historyItem = historyList.find(item => item.url === url);
+    const time = historyItem ? historyItem.time : 0;
     addLog(`读取播放位置：${url} -> ${Math.round(time)}秒`, 'info');
     return time;
 }
@@ -625,6 +666,8 @@ async function loadVideo(url, restorePosition = false) {
                             el.fullscreenBtn.disabled = false;
                             el.pipBtn.disabled = !('pictureInPictureEnabled' in document);
                             el.screenshotBtn.disabled = false;
+                            // 记录播放历史
+                            savePlayHistory(url);
                             // 自动播放
                             el.video.play().then(() => {
                                 el.pauseBtn.disabled = false;
@@ -687,6 +730,8 @@ async function loadVideo(url, restorePosition = false) {
                     el.fullscreenBtn.disabled = false;
                     el.pipBtn.disabled = !('pictureInPictureEnabled' in document);
                     el.screenshotBtn.disabled = false;
+                    // 记录播放历史
+                    savePlayHistory(url);
                     // 自动播放
                     el.video.play().then(() => {
                         el.pauseBtn.disabled = false;
@@ -727,6 +772,8 @@ else {
         el.fullscreenBtn.disabled = false;
         el.pipBtn.disabled = !('pictureInPictureEnabled' in document);
         el.screenshotBtn.disabled = false;
+        // 记录播放历史
+        savePlayHistory(url);
         // 自动播放
         el.video.play().then(() => {
             el.pauseBtn.disabled = false;
@@ -1006,6 +1053,18 @@ function bindEvents() {
     // 网络状态
     window.addEventListener('online', handleNetworkStatus);
     window.addEventListener('offline', handleNetworkStatus);
+
+    // 播放历史
+    el.historyBtn.addEventListener('click', () => {
+        el.historyBody.classList.toggle('show');
+        renderPlayHistory();
+    });
+
+    el.historyHeader.addEventListener('click', () => {
+        el.historyBody.classList.toggle('show');
+    });
+
+    el.historyClear.addEventListener('click', clearPlayHistory);
 
     // 页面关闭
     window.addEventListener('beforeunload', () => {

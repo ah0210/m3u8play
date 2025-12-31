@@ -2,6 +2,7 @@
   "name": "M3U8/MP4 播放器",
   "short_name": "视频播放器",
   "description": "一个功能强大的M3U8/MP4视频播放器，支持多种播放格式和自定义控制",
+  "id": "/play.html",
   "start_url": "./play.html",
   "display": "standalone",
   "background_color": "#000000",
