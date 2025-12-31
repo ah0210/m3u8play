@@ -581,7 +581,22 @@ function renderPlayHistory() {
         // 渲染历史记录
         sortedHistory.forEach(item => {
             const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
+            // 为当前播放的视频添加突出显示类
+            const isCurrentPlaying = currentVideoUrl === item.url;
+            historyItem.className = `history-item ${isCurrentPlaying ? 'current-playing' : ''}`;
+            
+            // 格式化日期，只显示年月日和时分
+            const formattedDate = new Date(item.date).toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // 计算播放进度百分比
+            const progressPercentage = item.duration > 0 ? Math.round((item.time / item.duration) * 100) : 0;
+            
             historyItem.innerHTML = `
                 <div class="history-item-content">
                     <div class="history-item-title-container">
@@ -591,11 +606,11 @@ function renderPlayHistory() {
                         </button>
                     </div>
                     <div class="history-item-meta">
-                        <span class="history-item-date">${new Date(item.date).toLocaleString()}</span>
-                        <span class="history-item-time">播放至 ${formatTime(item.time)} / ${formatTime(item.duration)}</span>
-                        <span class="history-item-playcount">播放 ${item.playCount || 1} 次</span>
+                        <span class="history-item-date">${formattedDate}</span>
+                        ${item.duration > 0 ? `<span class="history-item-time">播放进度：${formatTime(item.time)} / ${formatTime(item.duration)} (${progressPercentage}%)</span>` : ''}
+                        <span class="history-item-playcount"><i class="fas fa-fire" style="color: #ff9800; margin-right: 4px;"></i>${item.playCount || 1}次播放</span>
                     </div>
-                    <div class="history-item-url">${item.url}</div>
+                    <div class="history-item-url" title="${item.url}">${item.url.length > 50 ? `${item.url.substring(0, 50)}...` : item.url}</div>
                 </div>
                 <div class="history-item-actions">
                     <button class="history-item-play" title="播放" data-url="${item.url}">
