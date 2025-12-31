@@ -112,6 +112,85 @@ let currentTheme = 'light';
 let saveHistoryTimer = null; // 保存历史记录的防抖定时器
 const SAVE_HISTORY_DELAY = 2000; // 防抖延迟时间（毫秒）
 
+// ========== 安全工具函数：输入过滤和XSS防护 ==========
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function sanitizeInput(input) {
+    if (typeof input !== 'string') {
+        return input;
+    }
+    return escapeHtml(input);
+}
+
+// ========== 输入验证函数 ==========
+function isValidUrl(url) {
+    if (!url || typeof url !== 'string') {
+        return false;
+    }
+    
+    // 简单的URL格式验证
+    try {
+        const urlObj = new URL(url);
+        // 只允许http和https协议
+        return ['http:', 'https:'].includes(urlObj.protocol);
+    } catch (error) {
+        // 尝试处理相对URL或不完整URL
+        return /^https?:\/\/.+\.(m3u8|mp4|webm|ogg|avi|mov|wmv)$/i.test(url) || 
+               /^https?:\/\/.+\/playlist\.m3u8/i.test(url);
+    }
+}
+
+function isValidVideoUrl(url) {
+    if (!isValidUrl(url)) {
+        return false;
+    }
+    
+    // 验证是否为视频格式
+    const videoExtensions = ['.m3u8', '.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv'];
+    return videoExtensions.some(ext => url.toLowerCase().endsWith(ext)) ||
+           /\/playlist\.m3u8/i.test(url) ||
+           /\.m3u8\?/i.test(url);
+}
+
+// 验证导入的播放历史项格式
+function isValidImportedItem(item) {
+    if (!item || typeof item !== 'object') {
+        return false;
+    }
+    
+    // 必须包含url字段
+    if (!item.url || typeof item.url !== 'string') {
+        return false;
+    }
+    
+    // 可选字段的类型验证
+    if (item.title !== undefined && typeof item.title !== 'string') {
+        return false;
+    }
+    
+    if (item.time !== undefined && (typeof item.time !== 'number' || isNaN(item.time))) {
+        return false;
+    }
+    
+    if (item.duration !== undefined && (typeof item.duration !== 'number' || isNaN(item.duration))) {
+        return false;
+    }
+    
+    if (item.date !== undefined && typeof item.date !== 'string') {
+        return false;
+    }
+    
+    if (item.playCount !== undefined && (typeof item.playCount !== 'number' || isNaN(item.playCount))) {
+        return false;
+    }
+    
+    return true;
+}
+
 // ========== 3. 工具函数：国际化 ==========
 function updateI18n(lang) {
     currentLang = lang;
@@ -125,13 +204,21 @@ function updateI18n(lang) {
     if (el.qualityLabel) el.qualityLabel.textContent = langConfig.qualityLabel;
     if (el.alignLabel) el.alignLabel.textContent = langConfig.alignLabel;
     if (el.loadPlayText) el.loadPlayText.textContent = langConfig.loadPlayBtn;
-    if (el.pauseBtn) el.pauseBtn.innerHTML = `<i class="fas fa-pause"></i> <span>${langConfig.pauseBtn}</span>`;
-    if (el.fullscreenBtn) el.fullscreenBtn.innerHTML = `<i class="fas fa-expand"></i> <span>${langConfig.fullscreenBtn}</span>`;
-    if (el.pipBtn) el.pipBtn.innerHTML = `<i class="fas fa-expand-arrows-alt"></i> <span>${langConfig.pipBtn}</span>`;
-    if (el.screenshotBtn) el.screenshotBtn.innerHTML = `<i class="fas fa-camera"></i> <span>${langConfig.screenshotBtn}</span>`;
-    if (el.shortcutBtn) el.shortcutBtn.innerHTML = `<i class="fas fa-keyboard"></i> <span>${langConfig.shortcutBtn}</span>`;
-    if (el.clearCacheBtn) el.clearCacheBtn.innerHTML = `<i class="fas fa-trash"></i> <span>${langConfig.clearCacheBtn}</span>`;
-    if (el.historyBtn) el.historyBtn.innerHTML = `<i class="fas fa-history"></i> <span>${langConfig.historyBtn}</span>`;
+    
+    // 更新按钮内容，避免使用innerHTML
+    const updateButtonContent = (btn, iconClass, text) => {
+        if (!btn) return;
+        btn.innerHTML = `<i class="${iconClass}"></i> <span>${escapeHtml(text)}</span>`;
+    };
+    
+    updateButtonContent(el.pauseBtn, 'fas fa-pause', langConfig.pauseBtn);
+    updateButtonContent(el.fullscreenBtn, 'fas fa-expand', langConfig.fullscreenBtn);
+    updateButtonContent(el.pipBtn, 'fas fa-expand-arrows-alt', langConfig.pipBtn);
+    updateButtonContent(el.screenshotBtn, 'fas fa-camera', langConfig.screenshotBtn);
+    updateButtonContent(el.shortcutBtn, 'fas fa-keyboard', langConfig.shortcutBtn);
+    updateButtonContent(el.clearCacheBtn, 'fas fa-trash', langConfig.clearCacheBtn);
+    updateButtonContent(el.historyBtn, 'fas fa-history', langConfig.historyBtn);
+    
     if (el.urlInput) el.urlInput.placeholder = langConfig.urlInputPlaceholder;
     if (el.shortcutTitle) el.shortcutTitle.textContent = langConfig.shortcutTitle;
     if (el.historyTitle) el.historyTitle.textContent = langConfig.historyTitle;
@@ -183,29 +270,74 @@ function addLog(message, type = 'info') {
 }
 
 // ========== 6. 工具函数：状态提示 ==========
-function showStatus(text, type) {
+function showStatus(text, type, options = {}) {
+    // 验证参数
+    if (typeof text !== 'string') {
+        console.error('showStatus: text must be a string');
+        return;
+    }
+    
+    if (!el.statusTip) {
+        console.error('showStatus: statusTip element not found');
+        return;
+    }
+    
+    const {
+        duration = 3000,  // 默认显示3秒
+        keepVisible = false,  // 是否保持可见
+        logLevel = type === 'error' ? 'error' : 'success'  // 日志级别
+    } = options;
+    
+    // 更新状态提示
     el.statusTip.textContent = text;
     el.statusTip.className = `status-tip show ${type}`;
     
     // 记录日志
-    addLog(text, type === 'error' ? 'error' : 'success');
+    addLog(text, logLevel);
 
-    // 所有状态提示都自动隐藏，loading状态在hideLoading中会被显式隐藏
-    setTimeout(() => el.statusTip.classList.remove('show'), 3000);
+    // 自动隐藏，除非指定keepVisible为true
+    if (!keepVisible) {
+        // 清除之前的定时器
+        if (window.statusTipTimer) {
+            clearTimeout(window.statusTipTimer);
+        }
+        
+        // 设置新的定时器
+        window.statusTipTimer = setTimeout(() => {
+            el.statusTip.classList.remove('show');
+        }, duration);
+    }
 }
 
 // ========== 7. 工具函数：加载遮罩 ==========
 function showLoading(text = i18n[currentLang].loadingText) {
     isLoading = true;
-    el.loadingMask.classList.add('show');
-    el.loadingText.textContent = text;
-    showStatus(text, 'loading');
-    addLog(`开始加载：${text}`, 'info');
+    
+    if (el.loadingMask && el.loadingText) {
+        el.loadingMask.classList.add('show');
+        el.loadingText.textContent = text;
+        
+        // 显示状态提示，但不自动隐藏
+        showStatus(text, 'loading', {
+            keepVisible: true,
+            logLevel: 'info'
+        });
+        
+        addLog(`开始加载：${text}`, 'info');
+    }
 }
+
 function hideLoading() {
     isLoading = false;
-    el.loadingMask.classList.remove('show');
-    el.statusTip.classList.remove('show');
+    
+    if (el.loadingMask) {
+        el.loadingMask.classList.remove('show');
+    }
+    
+    if (el.statusTip) {
+        el.statusTip.classList.remove('show');
+    }
+    
     addLog('加载完成，隐藏遮罩', 'info');
 }
 
@@ -450,39 +582,59 @@ function handleNetworkStatus() {
 
 // 播放历史管理
 async function savePlayHistory(url, time = 0) {
-    if (!url) return;
-    
-    // 使用防抖机制，避免频繁写入
-    if (saveHistoryTimer) {
-        clearTimeout(saveHistoryTimer);
-    }
-    
-    saveHistoryTimer = setTimeout(async () => {
-        try {
-            // 获取现有记录
-            const existingItem = await playHistoryStorage.getRecord(url);
-            
-            // 准备记录数据
-            const historyItem = {
-                url: url,
-                title: existingItem ? existingItem.title : (url.split('/').pop().split('?')[0] || '未命名视频'),
-                time: Math.round(time),
-                duration: Math.round(el.video.duration || existingItem?.duration || 0),
-                date: new Date().toISOString(),
-                playCount: (existingItem?.playCount || 0) + 1
-            };
-            
-            // 保存到IndexedDB
-            await playHistoryStorage.saveRecord(historyItem);
-            addLog(`保存播放历史：${url}`, 'info');
-            
-            // 更新历史记录面板
-            await renderPlayHistory();
-        } catch (error) {
-            console.error('保存播放历史失败:', error);
-            addLog(`保存播放历史失败：${error.message}`, 'error');
+    try {
+        if (typeof url !== 'string') {
+            throw new TypeError('URL必须是字符串类型');
         }
-    }, SAVE_HISTORY_DELAY);
+        
+        if (!url) return;
+        
+        // 验证URL是否有效
+        if (!isValidUrl(url)) {
+            addLog(`无效的URL，跳过保存播放历史：${url}`, 'warn');
+            return;
+        }
+        
+        // 验证time参数类型
+        if (typeof time !== 'number' || isNaN(time)) {
+            throw new TypeError('播放时间必须是数字类型');
+        }
+        
+        // 使用防抖机制，避免频繁写入
+        if (saveHistoryTimer) {
+            clearTimeout(saveHistoryTimer);
+        }
+        
+        saveHistoryTimer = setTimeout(async () => {
+            try {
+                // 获取现有记录
+                const existingItem = await playHistoryStorage.getRecord(url);
+                
+                // 准备记录数据
+                const historyItem = {
+                    url: url,
+                    title: existingItem ? existingItem.title : (url.split('/').pop().split('?')[0] || '未命名视频'),
+                    time: Math.round(time),
+                    duration: Math.round(el.video.duration || existingItem?.duration || 0),
+                    date: new Date().toISOString(),
+                    playCount: (existingItem?.playCount || 0) + 1
+                };
+                
+                // 保存到IndexedDB
+                await playHistoryStorage.saveRecord(historyItem);
+                addLog(`保存播放历史：${url}`, 'info');
+                
+                // 更新历史记录面板
+                await renderPlayHistory();
+            } catch (error) {
+                console.error('保存播放历史失败:', error);
+                addLog(`保存播放历史失败：${error.message}`, 'error');
+            }
+        }, SAVE_HISTORY_DELAY);
+    } catch (error) {
+        console.error('savePlayHistory 函数执行异常:', error);
+        addLog(`保存播放历史异常：${error.message}`, 'error');
+    }
 }
 
 // 获取播放历史列表
@@ -541,6 +693,9 @@ async function renderPlayHistory(sortMode = null) {
         // 隐藏空状态
         historyEmpty.style.display = 'none';
         
+        // 使用文档片段优化DOM操作
+        const fragment = document.createDocumentFragment();
+        
         // 渲染历史记录
         historyList.forEach(item => {
             const historyItem = document.createElement('div');
@@ -560,11 +715,12 @@ async function renderPlayHistory(sortMode = null) {
             // 计算播放进度百分比
             const progressPercentage = item.duration > 0 ? Math.round((item.time / item.duration) * 100) : 0;
             
+            // 安全渲染HTML，对所有用户输入进行过滤
             historyItem.innerHTML = `
                 <div class="history-item-content">
                     <div class="history-item-title-container">
-                        <span class="history-item-title" data-url="${item.url}">${item.title}</span>
-                        <button class="history-item-edit" title="编辑名称" data-url="${item.url}">
+                        <span class="history-item-title" data-url="${escapeHtml(item.url)}">${escapeHtml(item.title)}</span>
+                        <button class="history-item-edit" title="编辑名称" data-url="${escapeHtml(item.url)}">
                             <i class="fas fa-edit"></i>
                         </button>
                     </div>
@@ -573,20 +729,23 @@ async function renderPlayHistory(sortMode = null) {
                         ${item.duration > 0 ? `<span class="history-item-time">播放进度：${formatTime(item.time)} / ${formatTime(item.duration)} (${progressPercentage}%)</span>` : ''}
                         <span class="history-item-playcount"><i class="fas fa-fire" style="color: #ff9800; margin-right: 4px;"></i>${item.playCount || 1}次播放</span>
                     </div>
-                    <div class="history-item-url" title="${item.url}">${item.url.length > 50 ? `${item.url.substring(0, 50)}...` : item.url}</div>
+                    <div class="history-item-url" title="${escapeHtml(item.url)}">${escapeHtml(item.url.length > 50 ? `${item.url.substring(0, 50)}...` : item.url)}</div>
                 </div>
                 <div class="history-item-actions">
-                    <button class="history-item-play" title="播放" data-url="${item.url}">
+                    <button class="history-item-play" title="播放" data-url="${escapeHtml(item.url)}">
                         <i class="fas fa-play"></i>
                     </button>
-                    <button class="history-item-delete" title="删除" data-url="${item.url}">
+                    <button class="history-item-delete" title="删除" data-url="${escapeHtml(item.url)}">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             `;
             
-            historyBody.appendChild(historyItem);
+            fragment.appendChild(historyItem);
         });
+        
+        // 一次性将所有元素添加到DOM中
+        historyBody.appendChild(fragment);
         
         // 添加事件监听器
         addHistoryItemListeners();
@@ -595,30 +754,38 @@ async function renderPlayHistory(sortMode = null) {
 
 // 为历史记录项添加事件监听器
 function addHistoryItemListeners() {
-    // 播放按钮事件
-    document.querySelectorAll('.history-item-play').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const url = e.target.closest('.history-item-play').dataset.url;
-            el.urlInput.value = url;
-            loadVideo(url);
-        });
-    });
+    // 使用事件委托替代单个元素的事件监听器
+    const historyBody = el.historyBody;
     
-    // 删除按钮事件
-    document.querySelectorAll('.history-item-delete').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const url = e.target.closest('.history-item-delete').dataset.url;
-            deleteHistoryItem(url);
-        });
-    });
+    // 移除之前的事件监听器（防止重复添加）
+    historyBody.removeEventListener('click', historyItemClickHandler);
     
-    // 编辑按钮事件
-    document.querySelectorAll('.history-item-edit').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const url = e.target.closest('.history-item-edit').dataset.url;
-            editHistoryItem(url);
-        });
-    });
+    // 添加事件委托
+    historyBody.addEventListener('click', historyItemClickHandler);
+}
+
+// 历史记录项点击事件处理函数
+function historyItemClickHandler(e) {
+    const target = e.target;
+    
+    // 处理播放按钮点击
+    if (target.closest('.history-item-play')) {
+        const url = target.closest('.history-item-play').dataset.url;
+        el.urlInput.value = url;
+        loadVideo(url);
+    }
+    
+    // 处理删除按钮点击
+    else if (target.closest('.history-item-delete')) {
+        const url = target.closest('.history-item-delete').dataset.url;
+        deleteHistoryItem(url);
+    }
+    
+    // 处理编辑按钮点击
+    else if (target.closest('.history-item-edit')) {
+        const url = target.closest('.history-item-edit').dataset.url;
+        editHistoryItem(url);
+    }
 }
 
 // 编辑历史记录项名称
@@ -680,32 +847,49 @@ async function importPlayHistory(file) {
             
             // 处理导入的历史记录
             let importedCount = 0;
+            let skippedCount = 0;
+            
             for (const importedItem of importedHistory) {
-                if (importedItem.url && typeof importedItem === 'object') {
-                    // 获取现有记录
-                    const existingItem = await playHistoryStorage.getRecord(importedItem.url);
-                    
-                    // 准备合并后的记录
-                    const mergedItem = {
-                        url: importedItem.url,
-                        title: existingItem ? existingItem.title : (importedItem.title || importedItem.url.split('/').pop().split('?')[0] || '未命名视频'),
-                        time: existingItem ? existingItem.time : (importedItem.time || 0),
-                        duration: existingItem ? existingItem.duration : (importedItem.duration || 0),
-                        date: existingItem ? existingItem.date : (importedItem.date || new Date().toISOString()),
-                        playCount: (existingItem?.playCount || 0) + (importedItem.playCount || 1)
-                    };
-                    
-                    // 保存到IndexedDB
-                    await playHistoryStorage.saveRecord(mergedItem);
-                    importedCount++;
+                // 验证导入项的基本结构
+                if (!isValidImportedItem(importedItem)) {
+                    skippedCount++;
+                    continue;
                 }
+                
+                // 验证URL是否有效
+                if (!isValidUrl(importedItem.url)) {
+                    skippedCount++;
+                    continue;
+                }
+                
+                // 获取现有记录
+                const existingItem = await playHistoryStorage.getRecord(importedItem.url);
+                
+                // 准备合并后的记录
+                const mergedItem = {
+                    url: importedItem.url,
+                    title: existingItem ? existingItem.title : (importedItem.title || importedItem.url.split('/').pop().split('?')[0] || '未命名视频'),
+                    time: existingItem ? existingItem.time : (importedItem.time || 0),
+                    duration: existingItem ? existingItem.duration : (importedItem.duration || 0),
+                    date: existingItem ? existingItem.date : (importedItem.date || new Date().toISOString()),
+                    playCount: (existingItem?.playCount || 0) + (importedItem.playCount || 1)
+                };
+                
+                // 保存到IndexedDB
+                await playHistoryStorage.saveRecord(mergedItem);
+                importedCount++;
             }
             
             // 更新界面
             await renderPlayHistory();
             
-            addLog(`播放历史导入成功，共导入 ${importedCount} 条记录`, 'info');
-            showStatus(`播放历史导入成功，共导入 ${importedCount} 条记录`, 'success');
+            let message = `播放历史导入成功，共导入 ${importedCount} 条记录`;
+            if (skippedCount > 0) {
+                message += `，跳过 ${skippedCount} 条无效记录`;
+            }
+            
+            addLog(message, 'info');
+            showStatus(message, 'success');
         } catch (error) {
             addLog(`播放历史导入失败：${error.message}`, 'error');
             showStatus(`播放历史导入失败：${error.message}`, 'error');
@@ -759,12 +943,26 @@ async function getPlayPosition(url) {
 
 // 加载视频
 async function loadVideo(url, restorePosition = false) {
-    if (!url || !url.trim()) {
-        showStatus(i18n[currentLang].statusErrorUrl, 'error');
-        return;
-    }
+    try {
+        if (typeof url !== 'string') {
+            throw new TypeError('URL必须是字符串类型');
+        }
+        
+        if (!url || !url.trim()) {
+            showStatus(i18n[currentLang].statusErrorUrl, 'error');
+            return;
+        }
 
-    currentVideoUrl = url.trim();
+        const trimmedUrl = url.trim();
+        
+        // 验证URL是否合法
+        if (!isValidVideoUrl(trimmedUrl)) {
+            showStatus('错误：请输入有效的视频URL', 'error');
+            addLog(`无效的视频URL：${trimmedUrl}`, 'error');
+            return;
+        }
+
+    currentVideoUrl = trimmedUrl;
     addLog(`开始加载视频：${currentVideoUrl}`, 'info');
 
     hideLoading();
@@ -929,7 +1127,7 @@ async function loadVideo(url, restorePosition = false) {
             addLog(`hls.js 加载失败：${error.message}`, 'error');
         }
     }
-else {
+    else {
     el.video.src = url;
     el.video.addEventListener('loadedmetadata', async () => {
         hideLoading();
@@ -981,7 +1179,14 @@ else {
         const errorText = i18n[currentLang].statusErrorVideo.replace('{msg}', errorMsg);
         showStatus(errorText, 'error');
     }, { once: true });
-}
+    }
+    } catch (error) {
+        hideLoading();
+        const errorMsg = `视频加载异常：${error.message || '未知错误'}`;
+        showStatus(errorMsg, 'error');
+        addLog(`视频加载异常：${error.message || '未知错误'}`, 'error');
+        console.error('loadVideo 函数执行异常:', error);
+    }
 }
 
 // ========== 11. 快捷键（适配国际化） ==========
