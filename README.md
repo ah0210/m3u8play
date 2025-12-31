@@ -93,12 +93,12 @@
    │Serving!                                  │
    │                                          │
    │   - Local:    http://localhost:3000      │
-   │   - Network:  http://192.168.1.35:3000   │
+   │   - Network:  http://192.168.1.123:3000   │
    │                                          │
    │   Copied local address to clipboard!     │
 ```
 - **停止服务**：`Ctrl + C` 
-               `taskkill /pid 3000 /f  # 替换 1234 为实际 PID`
+               `taskkill /pid 3000 /f  # 替换 3000 为实际 PID`
 
 - **批量停止**：
 `Windows：taskkill /f /im node.exe；`
