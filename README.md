@@ -95,19 +95,18 @@
 
 | 命令 | 功能 |
 |------|------|
+| `npm install` | 安装本地依赖 |
 | `npm start` | 启动本地服务器 |
 | `npm run stop` | 停止本地服务器 |
-| `npx serve -s . -l 3000` | 快速运行（无需安装依赖） |
+| `npm run dev` | 开发模式（与 start 命令功能相同） |
+| `npm run serve` | 启动静态文件服务（与 start 命令功能相同） |
 
-- **批量停止**：
-`Windows：taskkill /f /im node.exe；`
-`Mac/Linux：pkill node。
+### 关于依赖
 
-#### http-server 服务
-
- - **安装服务**：`npm install -g http-server`
- - **启动服务**：`http-server -p 8080 -c-1`
- - **停止服务**：`CTRL-C`
+- ✅ 项目使用**本地依赖**，无需全局安装任何工具
+- ✅ 所有依赖都在 `node_modules` 目录中，版本隔离
+- ✅ 直接运行 `npm install` 即可安装所有所需依赖
+- ✅ 支持跨平台运行（Windows/macOS/Linux）
 
 ## 浏览器兼容性
 
@@ -203,9 +202,17 @@ m3u8play/
 ### 开发环境搭建
 
 1. 克隆或下载项目文件
-2. 使用本地服务器运行（如 `serve -l 8080`）
-3. 在浏览器中打开开发者工具进行调试
-4. 修改代码后刷新页面查看效果
+2. 安装本地依赖：`npm install`
+3. 启动开发服务器：`npm run dev`
+4. 在浏览器中打开开发者工具进行调试
+5. 修改代码后刷新页面查看效果
+
+### 开发模式说明
+
+- 使用 `npm run dev` 或 `npm run serve` 启动开发服务器
+- 服务器默认监听 3000 端口，访问地址：`http://localhost:3000`
+- 支持热重载（修改代码后刷新页面即可）
+- 提供详细的日志输出，便于调试
 
 ### 日志查看
 
