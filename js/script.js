@@ -54,6 +54,9 @@ const el = {
     historyImportInput: document.getElementById('history-import-input'),
     historyBody: document.getElementById('history-body'),
     historyEmpty: document.getElementById('history-empty'),
+    alignLeftBtn: document.getElementById('align-left'),
+    alignCenterBtn: document.getElementById('align-center'),
+    alignRightBtn: document.getElementById('align-right'),
     volumeIcon: document.getElementById('volume-icon'),
     progressWrap: document.getElementById('progress-wrap'),
     progressBar: document.getElementById('progress-bar'),
@@ -113,6 +116,7 @@ function updateI18n(lang) {
     if (el.themeLabel) el.themeLabel.textContent = langConfig.themeLabel;
     if (el.speedLabel) el.speedLabel.textContent = langConfig.speedLabel;
     if (el.qualityLabel) el.qualityLabel.textContent = langConfig.qualityLabel;
+    if (el.alignLabel) el.alignLabel.textContent = langConfig.alignLabel;
     if (el.loadPlayText) el.loadPlayText.textContent = langConfig.loadPlayBtn;
     if (el.pauseBtn) el.pauseBtn.innerHTML = `<i class="fas fa-pause"></i> <span>${langConfig.pauseBtn}</span>`;
     if (el.fullscreenBtn) el.fullscreenBtn.innerHTML = `<i class="fas fa-expand"></i> <span>${langConfig.fullscreenBtn}</span>`;
@@ -1213,6 +1217,49 @@ function bindEvents() {
             e.target.value = '';
         }
     });
+    
+    // 对齐控制
+    function setPlayerAlignment(align) {
+        // 移除所有对齐类
+        document.body.classList.remove('player-align-left', 'player-align-center', 'player-align-right');
+        // 添加新的对齐类
+        document.body.classList.add(`player-align-${align}`);
+        
+        // 移除所有按钮的active类
+        el.alignLeftBtn.classList.remove('active');
+        el.alignCenterBtn.classList.remove('active');
+        el.alignRightBtn.classList.remove('active');
+        
+        // 添加当前对齐按钮的active类
+        if (align === 'left') {
+            el.alignLeftBtn.classList.add('active');
+        } else if (align === 'center') {
+            el.alignCenterBtn.classList.add('active');
+        } else if (align === 'right') {
+            el.alignRightBtn.classList.add('active');
+        }
+        
+        // 保存到localStorage
+        localStorage.setItem('playerAlignment', align);
+        addLog(`播放器对齐方式已切换至 ${align === 'left' ? '左对齐' : align === 'center' ? '居中对齐' : '右对齐'}`, 'info');
+    }
+    
+    // 对齐按钮事件
+    el.alignLeftBtn.addEventListener('click', () => {
+        setPlayerAlignment('left');
+    });
+    
+    el.alignCenterBtn.addEventListener('click', () => {
+        setPlayerAlignment('center');
+    });
+    
+    el.alignRightBtn.addEventListener('click', () => {
+        setPlayerAlignment('right');
+    });
+    
+    // 加载保存的对齐方式
+    const savedAlignment = localStorage.getItem('playerAlignment') || 'right';
+    setPlayerAlignment(savedAlignment);
 
     // 页面关闭
     window.addEventListener('beforeunload', () => {

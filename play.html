@@ -131,6 +131,22 @@
                         <option value="">自动</option>
                     </select>
                 </div>
+
+                <!-- 对齐方式选择 -->
+                <div class="control-group">
+                    <span id="alignLabel">对齐</span>
+                    <div class="align-controls">
+                        <button class="align-btn" id="align-left" title="左对齐" data-align="left">
+                            <i class="fas fa-align-left"></i>
+                        </button>
+                        <button class="align-btn" id="align-center" title="居中对齐" data-align="center">
+                            <i class="fas fa-align-center"></i>
+                        </button>
+                        <button class="align-btn active" id="align-right" title="右对齐" data-align="right">
+                            <i class="fas fa-align-right"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -162,15 +178,6 @@
         </ul>
     </div>
 
-    <!-- 日志面板 -->
-    <div class="log-panel">
-        <div class="log-header" id="log-header">
-            <span id="logTitle">播放日志</span>
-            <button class="log-clear" id="log-clear">清空日志</button>
-        </div>
-        <div class="log-body" id="log-body"></div>
-    </div>
-
     <!-- 播放历史面板 -->
     <div class="log-panel" id="history-panel">
         <div class="log-header" id="history-header">
@@ -185,6 +192,15 @@
         <div class="log-body" id="history-body">
             <div class="history-empty" id="history-empty">暂无播放历史</div>
         </div>
+    </div>
+
+    <!-- 日志面板 -->
+    <div class="log-panel">
+        <div class="log-header" id="log-header">
+            <span id="logTitle">播放日志</span>
+            <button class="log-clear" id="log-clear">清空日志</button>
+        </div>
+        <div class="log-body" id="log-body"></div>
     </div>
 
     <!-- 引入外部JavaScript文件 -->

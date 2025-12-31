@@ -261,6 +261,71 @@ body.dark .select-control {
     border-color: #4285f4;
 }
 
+/* 对齐控制样式 */
+.align-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.align-btn {
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.light .align-btn {
+    background: #222;
+    color: #fff;
+    border-color: #333;
+}
+
+body.light .align-btn:hover {
+    background: #333;
+    border-color: #4285f4;
+}
+
+body.light .align-btn.active {
+    background: #4285f4;
+    border-color: #4285f4;
+}
+
+body.dark .align-btn {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+body.dark .align-btn:hover {
+    background: #444;
+    border-color: #5c8ef7;
+}
+
+body.dark .align-btn.active {
+    background: #5c8ef7;
+    border-color: #5c8ef7;
+}
+
+/* 播放器对齐样式 */
+body.player-align-left .player-wrap {
+    margin: 0 0 0 0;
+}
+
+body.player-align-center .player-wrap {
+    margin: 0 auto;
+}
+
+body.player-align-right .player-wrap {
+    margin: 0 0 0 auto;
+}
+
 /* 音量控制 */
 .volume-wrap {
     display: flex;
@@ -445,6 +510,19 @@ body.dark .shortcut-tip .key {
     overflow: hidden;
     font-size: 12px;
     transition: background 0.3s, color 0.3s;
+}
+
+/* 日志面板对齐样式 */
+body.player-align-left .log-panel {
+    margin: 15px 0 0 0;
+}
+
+body.player-align-center .log-panel {
+    margin: 15px auto 0;
+}
+
+body.player-align-right .log-panel {
+    margin: 15px 0 0 auto;
 }
 body.light .log-panel {
     background: #f0f0f0;
