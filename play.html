@@ -183,6 +183,11 @@
         <div class="log-header" id="history-header">
             <span id="historyTitle">播放历史</span>
             <div class="history-header-actions">
+                <div class="sort-controls">
+                    <span>排序：</span>
+                    <button class="sort-btn active" id="sort-recent" data-sort="recent">最新</button>
+                    <button class="sort-btn" id="sort-hot" data-sort="hot">热度</button>
+                </div>
                 <button class="log-clear" id="history-export">导出历史</button>
                 <input type="file" id="history-import-input" accept=".json" style="display: none;">
                 <button class="log-clear" id="history-import">导入历史</button>

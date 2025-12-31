@@ -546,6 +546,53 @@ body.dark .log-panel {
     gap: 8px;
     align-items: center;
 }
+
+.sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.sort-btn {
+    padding: 4px 8px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+body.light .sort-btn {
+    color: #fff;
+    border-color: #333;
+}
+
+body.light .sort-btn:hover {
+    background: #333;
+    border-color: #4285f4;
+}
+
+body.light .sort-btn.active {
+    background: #4285f4;
+    border-color: #4285f4;
+}
+
+body.dark .sort-btn {
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+body.dark .sort-btn:hover {
+    background: #444;
+    border-color: #5c8ef7;
+}
+
+body.dark .sort-btn.active {
+    background: #5c8ef7;
+    border-color: #5c8ef7;
+}
 body.light .log-header {
     background: #e0e0e0;
 }
@@ -676,6 +723,16 @@ body.dark .history-item-edit:hover {
     display: flex;
     gap: 12px;
     margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+
+.history-item-playcount {
+    color: #4285f4;
+    font-weight: bold;
+}
+
+body.dark .history-item-playcount {
+    color: #5c8ef7;
 }
 
 body.dark .history-item-meta {

@@ -41,6 +41,11 @@
 - ✅ 状态反馈提示
 - ✅ 控制台日志输出
 
+
+IPTV直播源地址：https://iptv.hacks.tools/
+直播源汇总：https://www.juwanhezi.com/more/live
+直播源搜索  https://tonkiang.us/
+
 ## 技术栈
 
 - **HTML5** - 页面结构
