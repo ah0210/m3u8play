@@ -107,7 +107,8 @@ let currentVideoUrl = '';
 let reconnectTimer = null;
 let shortcutTimer = null;
 let touchTimer = null;
-let currentLang = 'zh-CN';
+// 从localStorage读取保存的语言，默认中文
+let currentLang = localStorage.getItem('playerLang') || 'zh-CN';
 let currentTheme = 'light';
 let saveHistoryTimer = null; // 保存历史记录的防抖定时器
 const SAVE_HISTORY_DELAY = 2000; // 防抖延迟时间（毫秒）
@@ -194,6 +195,8 @@ function isValidImportedItem(item) {
 // ========== 3. 工具函数：国际化 ==========
 function updateI18n(lang) {
     currentLang = lang;
+    // 保存语言到localStorage
+    localStorage.setItem('playerLang', lang);
     const langConfig = i18n[lang];
     
     // 确保元素存在后再更新
@@ -343,16 +346,28 @@ function hideLoading() {
 
 // ========== 8. 功能：缓存清理 ==========
 function clearCache() {
-    // 清除倍速记忆、主题设置，保留播放记录
+    // 清除所有播放器设置缓存，保留播放记录
     localStorage.removeItem('playerPreferredSpeed');
     localStorage.removeItem('playerTheme');
+    localStorage.removeItem('playerLang');
+    localStorage.removeItem('playerVolume');
+    localStorage.removeItem('playerMuted');
+    localStorage.removeItem('playerQuality');
     
     // 重置播放器状态
     el.speedSelect.value = '1';
     el.video.playbackRate = 1;
+    el.langSelect.value = 'zh-CN';
+    el.volumeSlider.value = 0.5;
+    el.video.volume = 0.5;
+    el.video.muted = false;
+    updateVolumeIcon();
     
-    showStatus('本地缓存已清理（倍速、主题）', 'success');
-    addLog('已清理本地缓存（倍速、主题）', 'success');
+    // 重置语言
+    updateI18n('zh-CN');
+    
+    showStatus(i18n[currentLang].statusSuccessClearCache, 'success');
+    addLog('已清理本地缓存（所有播放器设置）', 'success');
 }
 
 // ========== 9. 功能：移动端触摸操作 ==========
@@ -444,6 +459,7 @@ function initQualitySelector(hlsInstance) {
         const bitrate = Math.round(level.bitrate / 1000);
         const width = level.width || 'Unknown';
         const height = level.height || 'Unknown';
+
         const resolution = currentLang === 'zh-CN' ? 
             `${width}x${height} (${bitrate}kbps)` : 
             `${width}x${height} (${bitrate}kbps)`;
@@ -453,9 +469,18 @@ function initQualitySelector(hlsInstance) {
         el.qualitySelect.appendChild(option);
     });
 
+    // 从localStorage读取保存的画质
+    const savedQuality = localStorage.getItem('playerQuality');
+    if (savedQuality) {
+        el.qualitySelect.value = savedQuality;
+        hlsInstance.currentLevel = savedQuality === '' ? -1 : Number(savedQuality);
+    }
+
     el.qualitySelect.addEventListener('change', () => {
         const selectedLevel = el.qualitySelect.value;
         hlsInstance.currentLevel = selectedLevel === '' ? -1 : Number(selectedLevel);
+        // 保存画质到localStorage
+        localStorage.setItem('playerQuality', selectedLevel);
         const selectedText = selectedLevel === '' ? 
             (currentLang === 'zh-CN' ? '自动' : 'Auto') : 
             el.qualitySelect.options[el.qualitySelect.selectedIndex].text;
@@ -520,14 +545,22 @@ function captureScreenshot() {
 function togglePictureInPicture() {
     if (document.pictureInPictureElement) {
         document.exitPictureInPicture().then(() => {
-            el.pipBtn.textContent = currentLang === 'zh-CN' ? '画中画' : 'PiP';
+            // 只修改span元素的textContent，不替换整个按钮内容
+            const span = el.pipBtn.querySelector('span');
+            if (span) {
+                span.textContent = currentLang === 'zh-CN' ? '画中画' : 'PiP';
+            }
             showStatus(i18n[currentLang].statusSuccessExitPip, 'success');
         }).catch(err => {
             showStatus(i18n[currentLang].statusErrorPip.replace('{action}', currentLang === 'zh-CN' ? '退出' : 'Exit ').replace('{msg}', err.message), 'error');
         });
     } else {
         el.video.requestPictureInPicture().then(() => {
-            el.pipBtn.textContent = currentLang === 'zh-CN' ? '退出画中画' : 'Exit PiP';
+            // 只修改span元素的textContent，不替换整个按钮内容
+            const span = el.pipBtn.querySelector('span');
+            if (span) {
+                span.textContent = currentLang === 'zh-CN' ? '退出画中画' : 'Exit PiP';
+            }
             showStatus(i18n[currentLang].statusSuccessPip, 'success');
         }).catch(err => {
             showStatus(i18n[currentLang].statusErrorPip.replace('{action}', currentLang === 'zh-CN' ? '进入' : 'Enter ').replace('{msg}', err.message), 'error');
@@ -545,7 +578,11 @@ function toggleFullscreen() {
         } else if (el.video.msRequestFullscreen) {
             el.video.msRequestFullscreen();
         }
-        el.fullscreenBtn.textContent = currentLang === 'zh-CN' ? '退出全屏' : 'Exit Fullscreen';
+        // 只修改span元素的textContent，不替换整个按钮内容
+        const span = el.fullscreenBtn.querySelector('span');
+        if (span) {
+            span.textContent = currentLang === 'zh-CN' ? '退出全屏' : 'Exit Fullscreen';
+        }
         showStatus(i18n[currentLang].statusSuccessFullscreen, 'success');
     } else {
         if (document.exitFullscreen) {
@@ -555,7 +592,11 @@ function toggleFullscreen() {
         } else if (document.msExitFullscreen) {
             document.msExitFullscreen();
         }
-        el.fullscreenBtn.textContent = currentLang === 'zh-CN' ? '全屏' : 'Fullscreen';
+        // 只修改span元素的textContent，不替换整个按钮内容
+        const span = el.fullscreenBtn.querySelector('span');
+        if (span) {
+            span.textContent = currentLang === 'zh-CN' ? '全屏' : 'Fullscreen';
+        }
         showStatus(i18n[currentLang].statusSuccessExitFullscreen, 'success');
     }
 }
@@ -665,6 +706,9 @@ async function renderPlayHistory(sortMode = null) {
     // 获取当前排序方式
     const currentSortMode = sortMode || localStorage.getItem('historySortMode') || 'recent';
     
+    // 保存排序方式到localStorage
+    localStorage.setItem('historySortMode', currentSortMode);
+    
     // 确定排序参数
     let sortBy, sortOrder;
     if (currentSortMode === 'hot') {
@@ -675,6 +719,12 @@ async function renderPlayHistory(sortMode = null) {
         // 按时间排序（最新的排在前面）
         sortBy = 'date';
         sortOrder = 'desc';
+    }
+    
+    // 更新排序按钮的active状态
+    if (el.sortRecentBtn && el.sortHotBtn) {
+        el.sortRecentBtn.classList.toggle('active', currentSortMode === 'recent');
+        el.sortHotBtn.classList.toggle('active', currentSortMode === 'hot');
     }
     
     // 使用异步方式获取播放历史
@@ -746,10 +796,10 @@ async function renderPlayHistory(sortMode = null) {
         
         // 一次性将所有元素添加到DOM中
         historyBody.appendChild(fragment);
-        
-        // 添加事件监听器
-        addHistoryItemListeners();
     }
+    
+    // 无论列表是否为空，都添加事件监听器
+    addHistoryItemListeners();
 }
 
 // 为历史记录项添加事件监听器
@@ -931,10 +981,8 @@ function savePlayPosition(url, time) {
 // 获取播放位置 - 保留原有功能
 async function getPlayPosition(url) {
     try {
-        const historyItem = await playHistoryStorage.getRecord(url);
-        const time = historyItem ? historyItem.time : 0;
-        addLog(`读取播放位置：${url} -> ${Math.round(time)}秒`, 'info');
-        return time;
+        // 播放历史功能已移除，直接返回0
+        return 0;
     } catch (error) {
         console.error('获取播放位置失败:', error);
         return 0;
@@ -1309,26 +1357,34 @@ function bindEvents() {
     el.fullscreenBtn.addEventListener('click', toggleFullscreen);
     document.addEventListener('fullscreenchange', () => {
         const span = el.fullscreenBtn.querySelector('span');
-        span.textContent = document.fullscreenElement ? 
-            (currentLang === 'zh-CN' ? '退出全屏' : 'Exit Fullscreen') : 
-            (currentLang === 'zh-CN' ? '全屏' : 'Fullscreen');
+        if (span) {
+            span.textContent = document.fullscreenElement ? 
+                (currentLang === 'zh-CN' ? '退出全屏' : 'Exit Fullscreen') : 
+                (currentLang === 'zh-CN' ? '全屏' : 'Fullscreen');
+        }
     });
     document.addEventListener('webkitfullscreenchange', () => {
         const span = el.fullscreenBtn.querySelector('span');
-        span.textContent = document.webkitFullscreenElement ? 
-            (currentLang === 'zh-CN' ? '退出全屏' : 'Exit Fullscreen') : 
-            (currentLang === 'zh-CN' ? '全屏' : 'Fullscreen');
+        if (span) {
+            span.textContent = document.webkitFullscreenElement ? 
+                (currentLang === 'zh-CN' ? '退出全屏' : 'Exit Fullscreen') : 
+                (currentLang === 'zh-CN' ? '全屏' : 'Fullscreen');
+        }
     });
 
     // 画中画
     el.pipBtn.addEventListener('click', togglePictureInPicture);
     el.video.addEventListener('enterpictureinpicture', () => {
         const span = el.pipBtn.querySelector('span');
-        span.textContent = currentLang === 'zh-CN' ? '退出画中画' : 'Exit PiP';
+        if (span) {
+            span.textContent = currentLang === 'zh-CN' ? '退出画中画' : 'Exit PiP';
+        }
     });
     el.video.addEventListener('leavepictureinpicture', () => {
         const span = el.pipBtn.querySelector('span');
-        span.textContent = currentLang === 'zh-CN' ? '画中画' : 'PiP';
+        if (span) {
+            span.textContent = currentLang === 'zh-CN' ? '画中画' : 'PiP';
+        }
     });
 
     // 截图
@@ -1348,6 +1404,9 @@ function bindEvents() {
     el.volumeSlider.addEventListener('input', () => {
         el.video.volume = el.volumeSlider.value;
         el.video.muted = el.volumeSlider.value == 0;
+        // 保存音量到localStorage
+        localStorage.setItem('playerVolume', el.volumeSlider.value);
+        localStorage.setItem('playerMuted', el.video.muted);
         updateVolumeIcon();
     });
     
@@ -1356,7 +1415,13 @@ function bindEvents() {
         el.video.muted = !el.video.muted;
         if (el.video.muted) {
             el.volumeSlider.value = 0;
+        } else {
+            el.volumeSlider.value = localStorage.getItem('playerVolume') || 0.5;
+            el.video.volume = el.volumeSlider.value;
         }
+        // 保存音量状态到localStorage
+        localStorage.setItem('playerVolume', el.volumeSlider.value);
+        localStorage.setItem('playerMuted', el.video.muted);
         updateVolumeIcon();
     });
 
@@ -1450,74 +1515,61 @@ function bindEvents() {
     window.addEventListener('online', handleNetworkStatus);
     window.addEventListener('offline', handleNetworkStatus);
 
-    // 播放历史
-    el.historyBtn.addEventListener('click', async () => {
-        el.sidebar.classList.toggle('show');
-        await renderPlayHistory();
-        addLog('切换历史记录侧边栏', 'info');
-    });
-
-    // 侧边栏切换按钮
-    el.sidebarToggle.addEventListener('click', async () => {
-        el.sidebar.classList.toggle('show');
-        await renderPlayHistory();
-        addLog('切换历史记录侧边栏', 'info');
-    });
-
-    el.historyHeader.addEventListener('click', () => {
-        el.historyBody.classList.toggle('show');
-    });
-
-    el.historyClear.addEventListener('click', clearPlayHistory);
-
-    // 历史记录导入导出
-    el.historyExport.addEventListener('click', exportPlayHistory);
-    
-    el.historyImport.addEventListener('click', () => {
-        el.historyImportInput.click();
-    });
-    
-    el.historyImportInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            importPlayHistory(file);
-            // 重置文件输入，允许重新选择同一文件
-            e.target.value = '';
-        }
-    });
-    
-    // 历史记录排序
-    async function setHistorySortMode(mode) {
-        // 保存排序方式到localStorage
-        localStorage.setItem('historySortMode', mode);
-        
-        // 更新按钮状态
-        el.sortRecentBtn.classList.remove('active');
-        el.sortHotBtn.classList.remove('active');
-        
-        if (mode === 'recent') {
-            el.sortRecentBtn.classList.add('active');
-        } else if (mode === 'hot') {
-            el.sortHotBtn.classList.add('active');
-        }
-        
-        // 重新渲染历史记录
-        await renderPlayHistory(mode);
-        addLog(`播放历史排序方式已切换至 ${mode === 'recent' ? '最新' : '热度'}`, 'info');
+    // 侧边栏切换功能
+    if (el.sidebarToggle && el.sidebar) {
+        el.sidebarToggle.addEventListener('click', async () => {
+            el.sidebar.classList.toggle('show');
+            // 渲染播放历史列表
+            await renderPlayHistory();
+            addLog('切换侧边栏显示状态', 'info');
+        });
     }
     
-    // 排序按钮事件
-    el.sortRecentBtn.addEventListener('click', async () => {
-        await setHistorySortMode('recent');
-    });
+    // 历史记录标题栏事件
+    if (el.historyHeader) {
+        el.historyHeader.addEventListener('click', () => {
+            if (el.historyBody) {
+                el.historyBody.classList.toggle('show');
+            }
+        });
+    }
     
-    el.sortHotBtn.addEventListener('click', async () => {
-        await setHistorySortMode('hot');
-    });
+    // 清空播放历史
+    if (el.historyClear) {
+        el.historyClear.addEventListener('click', clearPlayHistory);
+    }
     
-    // 初始化排序状态
-    const savedSortMode = localStorage.getItem('historySortMode') || 'recent';
-    setHistorySortMode(savedSortMode);
+    // 历史记录导入导出
+    if (el.historyExport) {
+        el.historyExport.addEventListener('click', exportPlayHistory);
+    }
+    
+    if (el.historyImport && el.historyImportInput) {
+        el.historyImport.addEventListener('click', () => {
+            el.historyImportInput.click();
+        });
+        
+        el.historyImportInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                importPlayHistory(file);
+                // 重置文件输入，允许重新选择同一文件
+                e.target.value = '';
+            }
+        });
+    }
+    
+    // 历史记录排序
+    if (el.sortRecentBtn && el.sortHotBtn) {
+        // 排序按钮事件
+        el.sortRecentBtn.addEventListener('click', async () => {
+            await renderPlayHistory('recent');
+        });
+        
+        el.sortHotBtn.addEventListener('click', async () => {
+            await renderPlayHistory('hot');
+        });
+    }
     
     // 对齐控制
     function setPlayerAlignment(align) {
@@ -1527,16 +1579,16 @@ function bindEvents() {
         document.body.classList.add(`player-align-${align}`);
         
         // 移除所有按钮的active类
-        el.alignLeftBtn.classList.remove('active');
-        el.alignCenterBtn.classList.remove('active');
-        el.alignRightBtn.classList.remove('active');
+        if (el.alignLeftBtn) el.alignLeftBtn.classList.remove('active');
+        if (el.alignCenterBtn) el.alignCenterBtn.classList.remove('active');
+        if (el.alignRightBtn) el.alignRightBtn.classList.remove('active');
         
         // 添加当前对齐按钮的active类
-        if (align === 'left') {
+        if (align === 'left' && el.alignLeftBtn) {
             el.alignLeftBtn.classList.add('active');
-        } else if (align === 'center') {
+        } else if (align === 'center' && el.alignCenterBtn) {
             el.alignCenterBtn.classList.add('active');
-        } else if (align === 'right') {
+        } else if (align === 'right' && el.alignRightBtn) {
             el.alignRightBtn.classList.add('active');
         }
         
@@ -1546,17 +1598,23 @@ function bindEvents() {
     }
     
     // 对齐按钮事件
-    el.alignLeftBtn.addEventListener('click', () => {
-        setPlayerAlignment('left');
-    });
+    if (el.alignLeftBtn) {
+        el.alignLeftBtn.addEventListener('click', () => {
+            setPlayerAlignment('left');
+        });
+    }
     
-    el.alignCenterBtn.addEventListener('click', () => {
-        setPlayerAlignment('center');
-    });
+    if (el.alignCenterBtn) {
+        el.alignCenterBtn.addEventListener('click', () => {
+            setPlayerAlignment('center');
+        });
+    }
     
-    el.alignRightBtn.addEventListener('click', () => {
-        setPlayerAlignment('right');
-    });
+    if (el.alignRightBtn) {
+        el.alignRightBtn.addEventListener('click', () => {
+            setPlayerAlignment('right');
+        });
+    }
     
     // 加载保存的对齐方式
     const savedAlignment = localStorage.getItem('playerAlignment') || 'right';
@@ -1574,11 +1632,13 @@ function bindEvents() {
     });
     
     // 视频结束时保存播放历史
-    el.video.addEventListener('ended', () => {
-        if (currentVideoUrl) {
-            savePlayHistory(currentVideoUrl, el.video.duration);
-        }
-    });
+    if (el.video) {
+        el.video.addEventListener('ended', () => {
+            if (currentVideoUrl) {
+                savePlayHistory(currentVideoUrl, el.video.duration);
+            }
+        });
+    }
 }
 
 // ========== 13. 初始化 ==========
@@ -1592,6 +1652,9 @@ window.onload = async () => {
     updateTheme(savedTheme);
 
     // 初始化国际化
+    if (el.langSelect) {
+        el.langSelect.value = currentLang;
+    }
     updateI18n(currentLang);
 
     // 初始化倍速
@@ -1600,7 +1663,18 @@ window.onload = async () => {
     el.video.playbackRate = savedSpeed;
 
     // 初始化音量
-    el.video.volume = el.volumeSlider.value;
+    const savedVolume = localStorage.getItem('playerVolume');
+    const savedMuted = localStorage.getItem('playerMuted') === 'true';
+    if (savedVolume) {
+        el.volumeSlider.value = savedVolume;
+        el.video.volume = savedVolume;
+    } else {
+        // 默认音量0.5
+        el.volumeSlider.value = 0.5;
+        el.video.volume = 0.5;
+    }
+    el.video.muted = savedMuted;
+    updateVolumeIcon();
 
     // 初始化快捷键
     initShortcutKeys();

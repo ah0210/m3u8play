@@ -3,9 +3,9 @@
     "url": "https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u8",
     "title": "playlist_4500Kb.m3u8",
     "time": 0,
-    "duration": 0,
-    "date": "2025-12-31T14:33:16.345Z",
-    "playCount": 2
+    "duration": 43200,
+    "date": "2025-12-31T19:32:21.143Z",
+    "playCount": 19
   },
   {
     "url": "https://0472.org/hls/cgtn.m3u8",
@@ -196,20 +196,23 @@
     "title": "bbc3cbbc.m3u8",
     "time": 0,
     "duration": 0,
-    "date": "2025-12-31T10:28:16.395Z"
+    "date": "2025-12-31T10:28:16.395Z",
+    "playCount": 1
   },
   {
     "url": "https://cdn4.skygo.mn/live/disk1/BBC_earth/HLSv3-FTA/BBC_earth.m3u8",
     "title": "BBC_earth.m3u8",
     "time": 0,
     "duration": 0,
-    "date": "2025-12-31T10:04:53.820Z"
+    "date": "2025-12-31T10:04:53.820Z",
+    "playCount": 1
   },
   {
     "url": "https://stream.asiatvnet.com/1/live/master.m3u8",
     "title": "master.m3u8",
     "time": 0,
     "duration": 0,
-    "date": "2025-12-31T10:03:49.102Z"
+    "date": "2025-12-31T10:03:49.102Z",
+    "playCount": 1
   }
 ]
