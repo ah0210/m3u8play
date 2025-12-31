@@ -185,9 +185,8 @@ function showStatus(text, type) {
     // 记录日志
     addLog(text, type === 'error' ? 'error' : 'success');
 
-    if (type !== 'loading' && type !== 'offline') {
-        setTimeout(() => el.statusTip.classList.remove('show'), 3000);
-    }
+    // 所有状态提示都自动隐藏，loading状态在hideLoading中会被显式隐藏
+    setTimeout(() => el.statusTip.classList.remove('show'), 3000);
 }
 
 // ========== 7. 工具函数：加载遮罩 ==========

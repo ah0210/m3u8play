@@ -364,11 +364,18 @@ body.dark .volume-slider::-webkit-slider-thumb {
 
 /* 状态提示 */
 .status-tip {
-    margin-top: 15px;
-    padding: 10px;
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
     border-radius: 4px;
     font-size: 14px;
     display: none;
+    z-index: 100;
+    max-width: 80%;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 .status-tip.show {
     display: block;

@@ -108,7 +108,13 @@
 
 - **批量停止**：
 `Windows：taskkill /f /im node.exe；`
-`Mac/Linux：pkill node。`            
+`Mac/Linux：pkill node。`
+
+#### http-server 服务
+
+ - **安装服务**：`npm install -g http-server`
+ - **启动服务**：`http-server -p 8080 -c-1`
+ - **停止服务**：`CTRL-C`
 
 #### 服务管理特性
 
