@@ -1401,21 +1401,22 @@ function bindEvents() {
     el.centerPlayBtn.addEventListener('click', () => {
         if (isLoading) return;
         
-        // 如果没有视频URL，从输入框获取
-        if (!currentVideoUrl) {
-            const url = el.urlInput.value.trim();
-            if (url) {
-                loadVideo(url);
-            } else {
-                showStatus(i18n[currentLang].statusErrorUrl, 'error');
-            }
+        // 总是从输入框获取URL，确保播放最新输入的链接
+        const inputUrl = el.urlInput.value.trim();
+        
+        if (!inputUrl) {
+            // 输入框为空，显示错误提示
+            showStatus(i18n[currentLang].statusErrorUrl, 'error');
+        } else if (currentVideoUrl !== inputUrl) {
+            // 输入的URL与当前播放的URL不同，加载新视频
+            loadVideo(inputUrl);
         } else if (el.video.paused || el.video.ended) {
-            // 播放已有视频
+            // 输入的URL与当前播放的URL相同，且视频已暂停或结束，播放视频
             el.video.play().catch(err => {
                 showStatus(i18n[currentLang].statusErrorUnknown.replace('{msg}', err.message), 'error');
             });
         } else {
-            // 暂停已有视频
+            // 输入的URL与当前播放的URL相同，且视频正在播放，暂停视频
             el.video.pause();
         }
     });
@@ -1545,8 +1546,11 @@ function bindEvents() {
 
     // URL 输入框清除按钮
     function updateUrlClearBtnVisibility() {
-        // 始终显示清除按钮，不管输入框有没有内容
-        el.urlClearBtn.style.display = 'flex';
+        if (el.urlInput.value.trim()) {
+            el.urlClearBtn.classList.add('visible');
+        } else {
+            el.urlClearBtn.classList.remove('visible');
+        }
     }
 
     // 初始检查
@@ -1554,6 +1558,12 @@ function bindEvents() {
 
     // 输入时更新
     el.urlInput.addEventListener('input', updateUrlClearBtnVisibility);
+    
+    // 获得焦点时显示清除图标（如果有内容）
+    el.urlInput.addEventListener('focus', updateUrlClearBtnVisibility);
+    
+    // 失去焦点时，如果输入框为空则隐藏清除图标
+    el.urlInput.addEventListener('blur', updateUrlClearBtnVisibility);
 
     // 清除按钮点击事件
     el.urlClearBtn.addEventListener('click', () => {
