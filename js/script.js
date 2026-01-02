@@ -44,6 +44,7 @@ const el = {
     screenshotBtn: document.getElementById('screenshot-btn'),
     shortcutBtn: document.getElementById('shortcut-btn'),
     clearCacheBtn: document.getElementById('clear-cache-btn'),
+    helpBtn: document.getElementById('help-btn'),
     historyBtn: document.getElementById('history-btn'),
     historyPanel: document.getElementById('history-panel'),
     historyHeader: document.getElementById('history-header'),
@@ -71,6 +72,8 @@ const el = {
     screenshotImg: document.getElementById('screenshot-img'),
     screenshotClose: document.getElementById('screenshot-close'),
     screenshotDownload: document.getElementById('screenshot-download'),
+    helpModal: document.getElementById('help-modal'),
+    helpClose: document.getElementById('help-close'),
     shortcutTip: document.getElementById('shortcut-tip'),
     touchTip: document.getElementById('touch-tip'),
     // 国际化元素
@@ -346,13 +349,31 @@ function hideLoading() {
 
 // ========== 8. 功能：缓存清理 ==========
 function clearCache() {
-    // 清除所有播放器设置缓存，保留播放记录
+    // 显示确认窗口
+    const confirmMessage = i18n[currentLang].confirmClearCache || '确定要清理所有播放器设置缓存吗？这将删除您的现有设定，只保留播放记录。';
+    const confirmed = confirm(confirmMessage);
+    
+    if (!confirmed) {
+        // 用户取消，不执行清理
+        addLog('用户取消了缓存清理操作', 'info');
+        return;
+    }
+    
+    // 清除除播放记录外的所有播放器设置缓存
     localStorage.removeItem('playerPreferredSpeed');
     localStorage.removeItem('playerTheme');
     localStorage.removeItem('playerLang');
     localStorage.removeItem('playerVolume');
     localStorage.removeItem('playerMuted');
     localStorage.removeItem('playerQuality');
+    localStorage.removeItem('historySortMode');
+    localStorage.removeItem('playerAlignment');
+    localStorage.removeItem('helpModalShown');
+    localStorage.removeItem('lastPlayedVideoUrl');
+    // 清除输入框
+    if (el.urlInput) {
+        el.urlInput.value = '';
+    }
     
     // 重置播放器状态
     el.speedSelect.value = '1';
@@ -365,6 +386,21 @@ function clearCache() {
     
     // 重置语言
     updateI18n('zh-CN');
+    
+    // 直接重置对齐方式，避免函数作用域问题
+    document.body.classList.remove('player-align-left', 'player-align-center', 'player-align-right');
+    document.body.classList.add('player-align-right');
+    
+    // 重置对齐按钮状态
+    if (el.alignLeftBtn) el.alignLeftBtn.classList.remove('active');
+    if (el.alignCenterBtn) el.alignCenterBtn.classList.remove('active');
+    if (el.alignRightBtn) el.alignRightBtn.classList.add('active');
+    
+    // 重置排序方式
+    if (el.sortRecentBtn && el.sortHotBtn) {
+        el.sortRecentBtn.classList.add('active');
+        el.sortHotBtn.classList.remove('active');
+    }
     
     showStatus(i18n[currentLang].statusSuccessClearCache, 'success');
     addLog('已清理本地缓存（所有播放器设置）', 'success');
@@ -823,6 +859,14 @@ function historyItemClickHandler(e) {
         const url = target.closest('.history-item-play').dataset.url;
         el.urlInput.value = url;
         loadVideo(url);
+        // 关闭播放列表
+        if (el.historyBody) {
+            el.historyBody.classList.remove('show');
+        }
+        // 关闭整个侧边栏
+        if (el.sidebar) {
+            el.sidebar.classList.remove('show');
+        }
     }
     
     // 处理删除按钮点击
@@ -1011,6 +1055,8 @@ async function loadVideo(url, restorePosition = false) {
         }
 
     currentVideoUrl = trimmedUrl;
+    // 保存最新播放的视频URL到localStorage
+    localStorage.setItem('lastPlayedVideoUrl', trimmedUrl);
     addLog(`开始加载视频：${currentVideoUrl}`, 'info');
 
     hideLoading();
@@ -1514,11 +1560,41 @@ function bindEvents() {
     // 网络状态
     window.addEventListener('online', handleNetworkStatus);
     window.addEventListener('offline', handleNetworkStatus);
+    
+    // 帮助弹窗
+    if (el.helpBtn && el.helpModal && el.helpClose) {
+        // 显示帮助弹窗
+        el.helpBtn.addEventListener('click', () => {
+            el.helpModal.classList.add('show');
+            addLog('显示帮助弹窗', 'info');
+        });
+        
+        // 关闭帮助弹窗 - 点击关闭按钮
+        el.helpClose.addEventListener('click', closeHelpModal);
+        
+        // 点击弹窗外部关闭
+        el.helpModal.addEventListener('click', (e) => {
+            if (e.target === el.helpModal) {
+                closeHelpModal();
+            }
+        });
+        
+        // 按Esc键关闭弹窗
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && el.helpModal.classList.contains('show')) {
+                closeHelpModal();
+            }
+        });
+    }
 
     // 侧边栏切换功能
     if (el.sidebarToggle && el.sidebar) {
         el.sidebarToggle.addEventListener('click', async () => {
             el.sidebar.classList.toggle('show');
+            // 确保历史记录列表显示
+            if (el.sidebar.classList.contains('show') && el.historyBody) {
+                el.historyBody.classList.add('show');
+            }
             // 渲染播放历史列表
             await renderPlayHistory();
             addLog('切换侧边栏显示状态', 'info');
@@ -1723,5 +1799,37 @@ window.onload = async () => {
         loadVideo(videoUrl, savedTime > 0);
     }
 
+    // 检查是否需要自动显示帮助弹窗
+    const helpModalShown = localStorage.getItem('helpModalShown');
+    if (!helpModalShown && el.helpModal) {
+        // 首次打开，自动显示帮助弹窗
+        setTimeout(() => {
+            el.helpModal.classList.add('show');
+            addLog('自动显示帮助弹窗', 'info');
+        }, 1000); // 延迟1秒显示，确保页面完全加载
+    }
+    
+    // 恢复上次播放的视频URL到输入框，如果没有则使用默认地址
+    const defaultUrl = 'https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u8';
+    const lastPlayedUrl = localStorage.getItem('lastPlayedVideoUrl');
+    if (lastPlayedUrl && el.urlInput) {
+        el.urlInput.value = lastPlayedUrl;
+        addLog(`已恢复上次播放的视频URL：${lastPlayedUrl}`, 'info');
+    } else if (el.urlInput) {
+        // 没有最新播放记录，使用默认地址
+        el.urlInput.value = defaultUrl;
+        addLog(`使用默认视频URL：${defaultUrl}`, 'info');
+    }
+    
     addLog('播放器初始化完成', 'success');
 };
+
+// 关闭帮助弹窗时记录到缓存
+function closeHelpModal() {
+    if (el.helpModal) {
+        el.helpModal.classList.remove('show');
+        // 记录到缓存，标记弹窗已显示
+        localStorage.setItem('helpModalShown', 'true');
+        addLog('关闭帮助弹窗并记录到缓存', 'info');
+    }
+}

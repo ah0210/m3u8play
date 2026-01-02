@@ -59,7 +59,7 @@
                     <div class="control-row">
                         <div class="url-input-wrapper">
                             <input type="text" id="url-input" placeholder="输入 m3u8/MP4 链接" 
-                                   value="https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u8">
+                                   value="">
                             <button type="button" id="url-clear-btn" class="url-clear-btn" title="清除">
                                 <i class="fas fa-times"></i>
                             </button>
@@ -84,6 +84,11 @@
                         </button>
                         <button class="control-btn" id="clear-cache-btn">
                             <i class="fas fa-trash"></i> <span>清理缓存</span>
+                        </button>
+                        
+                        <!-- 帮助按钮 -->
+                        <button class="control-btn" id="help-btn" title="使用帮助">
+                            <i class="fas fa-question-circle"></i> <span>帮助</span>
                         </button>
                         
                         <!-- 语言选择 -->
@@ -225,6 +230,40 @@
             <button class="log-clear" id="log-clear">清空日志</button>
         </div>
         <div class="log-body" id="log-body"></div>
+    </div>
+
+    <!-- 帮助弹窗 -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>使用帮助</h2>
+                <button id="help-close" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h3>播放历史列表使用方法</h3>
+                    <ul>
+                        <li>把你喜欢的直播源，输入播放框内点击播放</li>
+                        <li>播放视频后，系统会自动记录播放历史</li>
+                        <li>点击左上角"播放历史"图标查看全部记录，再次点击关闭</li>
+                        <li>支持按"最近"和"次数"排序，如果记录空白，请再点一次按钮</li>
+                        <li>点击播放源旁边的蓝色"播放"按钮可继续播放</li>
+                        <li>点击红色"删除"按钮，将移除本条历史记录！</li>
+                        <li>支持导出播放历史到本地和导入播放历史</li>
+                        <li>建议经常导出播放历史记录，以便随时备份</li>
+                        <li>导出文件格式为json</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h3>播放源地址</h3>
+                    <p>GitHub: <a href="https://www.17you.com" target="_blank">https://www.17you.com</a></p>
+                </div>
+                <div class="help-section">
+                    <h3>项目地址</h3>
+                    <p>GitHub: <a href="https://github.com/ah0210/m3u8play" target="_blank">https://github.com/ah0210/m3u8play</a></p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 引入外部JavaScript文件 -->
