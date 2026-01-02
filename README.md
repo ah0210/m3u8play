@@ -45,6 +45,7 @@
 - **IPTV直播源地址：** https://iptv.hacks.tools/
 - **直播源汇总：** https://www.juwanhezi.com/more/live
 - **直播源搜索：**  https://tonkiang.us/
+- **格式转换：** https://yang-1989.eu.org/Conversion.php
 
 ## 技术栈
 

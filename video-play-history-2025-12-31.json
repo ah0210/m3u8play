@@ -1,43 +1,131 @@
 [
   {
-    "url": "https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u8",
-    "title": "playlist_4500Kb.m3u8",
+    "url": "http://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8",
+    "title": "NEWMAX",
     "time": 0,
-    "duration": 43200,
-    "date": "2025-12-31T21:00:49.132Z",
-    "playCount": 33
-  },
-  {
-    "url": "https://0472.org/hls/cgtn.m3u8",
-    "title": "cgtn.m3u8",
-    "time": 315,
-    "duration": 340,
-    "date": "2025-12-31T14:14:43.500Z",
-    "playCount": 5
-  },
-  {
-    "url": "https://rmplive.hljtv.com/live/suihua.m3u8",
-    "title": "suihua.m3u8",
-    "time": 0,
-    "duration": 0,
-    "date": "2025-12-31T13:53:40.677Z",
+    "duration": 18,
+    "date": "2026-01-01T06:30:19.739Z",
     "playCount": 1
   },
   {
-    "url": "https://english-livetx.cgtn.com/hls/yypdyyctzb_hd.m3u8",
-    "title": "yypdyyctzb_hd.m3u8",
+    "url": "https://amdlive-ch01-ctnd-com.akamaized.net/arirang_1ch/smil:arirang_1ch.smil/chunklist_b3256000_sleng.m3u8",
+    "title": "ARRANG",
     "time": 0,
-    "duration": 0,
-    "date": "2025-12-31T13:52:57.933Z",
+    "duration": 6,
+    "date": "2026-01-01T06:29:38.556Z",
+    "playCount": 1
+  },
+  {
+    "url": "https://rakutenaa-lightning-gbnews-rakuten-ccoa9.amagi.tv/ts-eu-w1-n2/playlist/rakutenAA-lightning-gbnews-rakuten/cb563d1f7a6c618d84cc3c78d9f962ffa65928d80b6c852a6ab454876da64607d1e3b680fd358b785d9f01de6a1a0a080361cf12ce3407c3c76ad91174204213cfcac9229d86170ab5c60c2c3aab016635837209c0790a79dca93d0d8636ba304530e01b615b37c2ec5dae6852db80148b6f4adafb8c2360625f5c98435ee3b24aa4feb20c41da3aa6ac494ec12658e68314c9c94db889874699128577f8109993f68a8146e0c6ab5c91a8613a733a0153dbe55a9bc053b7a8f5035bbd42588d9ac884d9f7df5d35873d2f347c2fd7cd03db12df802b862241d3855153f652a247d0658fe447aca2b5d8484838aac3110175e48d28ed8a8b2257887f88cefd0a92ff66625067f64d924f0a2b99fc84278cc21b91be228c8ea47c52cfbc4a8194be8feeffd804cc6582f0fd96394d5970442cb21df3ca238b729d4fa1c04575070d5cfbce1c84a7c94e3c6778838275dd0754ec88dccd8c587b824b336ec54c951b0965c7312c5be02ef295752caa2e188a3838b40961d30cacf67cbbf79bd6073db4ccce0daa3cb8fb59848477c3070b500cb7fd3b4c051d2da28948397028930bb4a9898b112e0fe3f0c1fbba231b0f2b185f09cbafa7479280c4260a0583340265671b039914dc0b8651a961850ba679ca05798060cd64b0ecba3c7f5930dc5db3/91/640x360_1020800/index.m3u8",
+    "title": "gbnews",
+    "time": 0,
+    "duration": 60,
+    "date": "2026-01-01T06:17:26.922Z",
+    "playCount": 1
+  },
+  {
+    "url": "https://vs-hls-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/t=3840/v=pv14/b=5070016/main.m3u8",
+    "title": "BBC NEWS",
+    "time": 0,
+    "duration": 7200,
+    "date": "2026-01-01T06:14:55.216Z",
+    "playCount": 1
+  },
+  {
+    "url": "https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_4.m3u8?zshijd",
+    "title": "CNA",
+    "time": 0,
+    "duration": null,
+    "date": "2026-01-01T06:11:14.051Z",
+    "playCount": 1
+  },
+  {
+    "url": "https://live.france24.com/hls/live/2037218-b/F24_EN_HI_HLS/master_500.m3u8",
+    "title": "FRANCE24",
+    "time": 0,
+    "duration": 100,
+    "date": "2026-01-01T06:07:39.154Z",
+    "playCount": 1
+  },
+  {
+    "url": "https://bsttv.bonus-tv.ru/cdn/bst/playlist_sdhigh.m3u8",
+    "title": "BONUSTVRU",
+    "time": 0,
+    "duration": 36,
+    "date": "2026-01-01T06:05:45.771Z",
+    "playCount": 1
+  },
+  {
+    "url": "https://content-aaps1.uplynk.com/channel/896bfd551dfb44b1ab3cc3be9b92e285/d.m3u8?pbs=fb73488569c444808f63742c2acef880",
+    "title": "ABCNEWS",
+    "time": 0,
+    "duration": null,
+    "date": "2026-01-01T06:02:16.243Z",
+    "playCount": 1
+  },
+  {
+    "url": "https://fox-foxnewsnow-vizio.amagi.tv/playlist240-p.m3u8",
+    "title": "foxnews",
+    "time": 0,
+    "duration": 60,
+    "date": "2026-01-01T06:00:00.780Z",
+    "playCount": 1
+  },
+  {
+    "url": "https://liveprodusphoenixeast.akamaized.net/USPhx-HD/Channel-TX-USPhx-AWS-virginia-1/Source-USPhx-16k-1-s6lk2-BP-07-02-81ykIWnsMsg_live.m3u8",
+    "title": "bloomberg",
+    "time": 0,
+    "duration": 10,
+    "date": "2026-01-01T05:58:06.290Z",
     "playCount": 1
   },
   {
     "url": "https://livehub-voidnet.onrender.com/cluster/streamcore/us/NBC_REDIS.m3u8",
     "title": "NBC_REDIS.m3u8",
     "time": 0,
-    "duration": 0,
-    "date": "2025-12-31T13:36:35.655Z",
+    "duration": 120,
+    "date": "2026-01-01T05:16:36.370Z",
+    "playCount": 3
+  },
+  {
+    "url": "https://english-livetx.cgtn.com/hls/yypdyyctzb_hd.m3u8",
+    "title": "cgtn",
+    "time": 0,
+    "duration": 30,
+    "date": "2026-01-01T05:15:59.973Z",
     "playCount": 2
+  },
+  {
+    "url": "https://rmplive.hljtv.com/live/suihua.m3u8",
+    "title": "suihua.m3u8",
+    "time": 0,
+    "duration": 65,
+    "date": "2026-01-01T05:15:47.688Z",
+    "playCount": 2
+  },
+  {
+    "url": "https://turnerlive.warnermediacdn.com/hls/live/586495/cnngo/cnn_slate/VIDEO_3_1464000.m3u8",
+    "title": "CNNusa",
+    "time": 0,
+    "duration": 595,
+    "date": "2026-01-01T05:03:32.016Z",
+    "playCount": 5
+  },
+  {
+    "url": "https://0472.org/hls/cgtn.m3u8",
+    "title": "cgtn.m3u8",
+    "time": 0,
+    "duration": 30,
+    "date": "2026-01-01T04:36:51.127Z",
+    "playCount": 6
+  },
+  {
+    "url": "https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u8",
+    "title": "RTRUSSIA",
+    "time": 0,
+    "duration": 43200,
+    "date": "2026-01-01T04:35:39.757Z",
+    "playCount": 37
   },
   {
     "url": "https://livehub-voidnet.onrender.com/cluster/streamcore/jp/NHK_StreamOrchestrator.m3u8",
