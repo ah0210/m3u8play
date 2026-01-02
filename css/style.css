@@ -297,29 +297,27 @@ body.dark #url-input {
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: #ff4444;
+    color: white;
     cursor: pointer;
     font-size: 12px;
-    opacity: 0;
-    transition: opacity 0.2s ease, background 0.2s ease;
+    opacity: 1;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
-}
-
-body.dark .url-clear-btn {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.url-clear-btn.visible {
-    opacity: 1;
     pointer-events: all;
+    z-index: 10;
 }
 
 .url-clear-btn:hover {
-    background: rgba(255, 0, 0, 0.5);
+    background: #ff6666;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.url-clear-btn:active {
+    background: #ff2222;
+    transform: translateY(-50%) scale(0.9);
 }
 
 /* 进度条 */
@@ -1028,6 +1026,50 @@ body.dark .history-item-delete:hover {
 
 body.dark .history-empty {
     color: #aaa;
+}
+
+/* 居中播放按钮 */
+.center-play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: rgba(66, 133, 244, 0.8);
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(66, 133, 244, 0.5);
+}
+
+.center-play-btn:hover {
+    background: rgba(66, 133, 244, 1);
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 30px rgba(66, 133, 244, 0.8);
+}
+
+.center-play-btn:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+.center-play-btn.hide {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.8);
+}
+
+.center-play-btn i {
+    margin-left: 6px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 /* 移动端触摸提示 */

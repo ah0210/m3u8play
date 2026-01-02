@@ -36,9 +36,6 @@ const el = {
     statusTip: document.getElementById('status-tip'),
     urlInput: document.getElementById('url-input'),
     urlClearBtn: document.getElementById('url-clear-btn'),
-    loadPlayBtn: document.getElementById('load-play-btn'),
-    loadPlayText: document.getElementById('load-play-text'),
-    pauseBtn: document.getElementById('pause-btn'),
     fullscreenBtn: document.getElementById('fullscreen-btn'),
     pipBtn: document.getElementById('pip-btn'),
     screenshotBtn: document.getElementById('screenshot-btn'),
@@ -67,6 +64,7 @@ const el = {
     volumeSlider: document.getElementById('volume-slider'),
     speedSelect: document.getElementById('speed-select'),
     qualitySelect: document.getElementById('quality-select'),
+    centerPlayBtn: document.getElementById('center-play-btn'),
     // 扩展元素
     screenshotModal: document.getElementById('screenshot-modal'),
     screenshotImg: document.getElementById('screenshot-img'),
@@ -389,12 +387,12 @@ function clearCache() {
     
     // 直接重置对齐方式，避免函数作用域问题
     document.body.classList.remove('player-align-left', 'player-align-center', 'player-align-right');
-    document.body.classList.add('player-align-right');
+    document.body.classList.add('player-align-center');
     
     // 重置对齐按钮状态
     if (el.alignLeftBtn) el.alignLeftBtn.classList.remove('active');
-    if (el.alignCenterBtn) el.alignCenterBtn.classList.remove('active');
-    if (el.alignRightBtn) el.alignRightBtn.classList.add('active');
+    if (el.alignCenterBtn) el.alignCenterBtn.classList.add('active');
+    if (el.alignRightBtn) el.alignRightBtn.classList.remove('active');
     
     // 重置排序方式
     if (el.sortRecentBtn && el.sortHotBtn) {
@@ -1084,7 +1082,6 @@ async function loadVideo(url, restorePosition = false) {
     }
     
     // 重置所有控制状态
-            el.pauseBtn.disabled = true;
             el.fullscreenBtn.disabled = true;
             el.pipBtn.disabled = true;
             el.screenshotBtn.disabled = true;
@@ -1130,10 +1127,7 @@ async function loadVideo(url, restorePosition = false) {
                             // 记录播放历史
                             await savePlayHistory(url);
                             // 自动播放
-                            el.video.play().then(() => {
-                                el.pauseBtn.disabled = false;
-                                showStatus(i18n[currentLang].statusSuccessPlay, 'success');
-                            }).catch(err => {
+                            el.video.play().catch(err => {
                                 // 自动播放失败时不报错，允许用户手动播放
                                 console.log('自动播放失败，等待用户手动播放:', err.message);
                             });
@@ -1168,7 +1162,6 @@ async function loadVideo(url, restorePosition = false) {
                                 // 彻底清除视频源，避免blob URL错误
                                 el.video.src = '';
                                 // 重置控制状态
-                                el.pauseBtn.disabled = true;
                                 el.fullscreenBtn.disabled = true;
                                 el.pipBtn.disabled = true;
                                 el.screenshotBtn.disabled = true;
@@ -1194,10 +1187,7 @@ async function loadVideo(url, restorePosition = false) {
                     // 记录播放历史
                     await savePlayHistory(url);
                     // 自动播放
-                    el.video.play().then(() => {
-                        el.pauseBtn.disabled = false;
-                        showStatus(i18n[currentLang].statusSuccessPlay, 'success');
-                    }).catch(err => {
+                    el.video.play().catch(err => {
                         // 自动播放失败时不报错，允许用户手动播放
                         console.log('自动播放失败，等待用户手动播放:', err.message);
                     });
@@ -1236,13 +1226,10 @@ async function loadVideo(url, restorePosition = false) {
         // 记录播放历史
         await savePlayHistory(url);
         // 自动播放
-        el.video.play().then(() => {
-            el.pauseBtn.disabled = false;
-            showStatus(i18n[currentLang].statusSuccessPlay, 'success');
-        }).catch(err => {
-            // 自动播放失败时不报错，允许用户手动播放
-            console.log('自动播放失败，等待用户手动播放:', err.message);
-        });
+                    el.video.play().catch(err => {
+                        // 自动播放失败时不报错，允许用户手动播放
+                        console.log('自动播放失败，等待用户手动播放:', err.message);
+                    });
     }, { once: true });
 
     el.video.addEventListener('error', (e) => {
@@ -1374,29 +1361,63 @@ function updateVolumeIcon() {
     }
 }
 
+// 控制居中播放按钮的显示和隐藏
+function toggleCenterPlayBtn() {
+    if (el.centerPlayBtn) {
+        if (el.video.paused || el.video.ended) {
+            el.centerPlayBtn.classList.remove('hide');
+        } else {
+            el.centerPlayBtn.classList.add('hide');
+        }
+    }
+}
+
 // ========== 12. 事件绑定 ==========
 function bindEvents() {
-    // 加载播放按钮
-    el.loadPlayBtn.addEventListener('click', () => {
-        const url = el.urlInput.value.trim();
-        if (!currentVideoUrl || currentVideoUrl !== url) {
-            // 加载新视频
-            loadVideo(url);
-        } else if (el.video.paused && !isLoading) {
-            // 播放已有视频
-            el.video.play().then(() => {
-                el.pauseBtn.disabled = false;
-                showStatus(i18n[currentLang].statusSuccessPlay, 'success');
-            }).catch(err => {
-                showStatus(i18n[currentLang].statusErrorUnknown.replace('{msg}', err.message), 'error');
-            });
-        }
+    // 视频播放事件
+    el.video.addEventListener('play', () => {
+        // 更新播放按钮显示状态
+        toggleCenterPlayBtn();
+        showStatus(i18n[currentLang].statusSuccessPlay, 'success');
     });
 
-    el.pauseBtn.addEventListener('click', () => {
-        el.video.pause();
+    // 视频暂停事件
+    el.video.addEventListener('pause', () => {
         savePlayPosition(currentVideoUrl, el.video.currentTime);
+        // 更新播放按钮显示状态
+        toggleCenterPlayBtn();
         showStatus(i18n[currentLang].statusSuccessPause, 'success');
+    });
+
+    // 视频结束事件
+    el.video.addEventListener('ended', () => {
+        savePlayPosition(currentVideoUrl, 0);
+        // 更新播放按钮显示状态
+        toggleCenterPlayBtn();
+        showStatus(i18n[currentLang].statusSuccessEnd, 'success');
+    });
+
+    // 居中播放按钮点击事件
+    el.centerPlayBtn.addEventListener('click', () => {
+        if (isLoading) return;
+        
+        // 如果没有视频URL，从输入框获取
+        if (!currentVideoUrl) {
+            const url = el.urlInput.value.trim();
+            if (url) {
+                loadVideo(url);
+            } else {
+                showStatus(i18n[currentLang].statusErrorUrl, 'error');
+            }
+        } else if (el.video.paused || el.video.ended) {
+            // 播放已有视频
+            el.video.play().catch(err => {
+                showStatus(i18n[currentLang].statusErrorUnknown.replace('{msg}', err.message), 'error');
+            });
+        } else {
+            // 暂停已有视频
+            el.video.pause();
+        }
     });
 
     // 全屏
@@ -1484,6 +1505,8 @@ function bindEvents() {
         if (!el.video.duration) return;
         const percent = (el.video.currentTime / el.video.duration) * 100;
         el.progressBar.style.width = `${percent}%`;
+        // 更新播放按钮显示状态
+        toggleCenterPlayBtn();
     });
 
     el.video.addEventListener('progress', () => {
@@ -1510,16 +1533,20 @@ function bindEvents() {
 
     // 回车加载
     el.urlInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') el.loadPlayBtn.click();
+        if (e.key === 'Enter') {
+            const url = el.urlInput.value.trim();
+            if (url) {
+                loadVideo(url);
+            } else {
+                showStatus(i18n[currentLang].statusErrorUrl, 'error');
+            }
+        }
     });
 
     // URL 输入框清除按钮
     function updateUrlClearBtnVisibility() {
-        if (el.urlInput.value.trim()) {
-            el.urlClearBtn.classList.add('visible');
-        } else {
-            el.urlClearBtn.classList.remove('visible');
-        }
+        // 始终显示清除按钮，不管输入框有没有内容
+        el.urlClearBtn.style.display = 'flex';
     }
 
     // 初始检查
@@ -1647,6 +1674,24 @@ function bindEvents() {
         });
     }
     
+    // 初始化居中播放按钮状态
+    toggleCenterPlayBtn();
+    
+    // 视频点击事件：点击视频暂停/播放
+    el.video.addEventListener('click', () => {
+        if (isLoading) return;
+        
+        if (el.video.paused || el.video.ended) {
+            // 播放视频
+            el.video.play().catch(err => {
+                showStatus(i18n[currentLang].statusErrorUnknown.replace('{msg}', err.message), 'error');
+            });
+        } else {
+            // 暂停视频
+            el.video.pause();
+        }
+    });
+    
     // 对齐控制
     function setPlayerAlignment(align) {
         // 移除所有对齐类
@@ -1693,7 +1738,7 @@ function bindEvents() {
     }
     
     // 加载保存的对齐方式
-    const savedAlignment = localStorage.getItem('playerAlignment') || 'right';
+    const savedAlignment = localStorage.getItem('playerAlignment') || 'center';
     setPlayerAlignment(savedAlignment);
 
     // 页面关闭

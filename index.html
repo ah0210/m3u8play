@@ -51,6 +51,10 @@
                     <button class="sidebar-toggle" id="sidebar-toggle" title="切换历史记录">
                         <i class="fas fa-history"></i>
                     </button>
+                    <!-- 居中播放按钮 -->
+                    <button class="center-play-btn" id="center-play-btn">
+                        <i class="fas fa-play"></i>
+                    </button>
                 </div>
 
                 <!-- 自定义控制栏 -->
@@ -61,15 +65,9 @@
                             <input type="text" id="url-input" placeholder="输入 m3u8/MP4 链接" 
                                    value="">
                             <button type="button" id="url-clear-btn" class="url-clear-btn" title="清除">
-                                <i class="fas fa-times"></i>
+                                ×
                             </button>
                         </div>
-                        <button class="control-btn" id="load-play-btn">
-                            <i class="fas fa-play"></i> <span id="load-play-text">加载播放</span>
-                        </button>
-                        <button class="control-btn" id="pause-btn" disabled>
-                            <i class="fas fa-pause"></i> <span>暂停</span>
-                        </button>
                         <button class="control-btn" id="fullscreen-btn" disabled>
                             <i class="fas fa-expand"></i> <span>全屏</span>
                         </button>
@@ -152,10 +150,10 @@
                                 <button class="align-btn" id="align-left" title="左对齐" data-align="left">
                                     <i class="fas fa-align-left"></i>
                                 </button>
-                                <button class="align-btn" id="align-center" title="居中对齐" data-align="center">
+                                <button class="align-btn active" id="align-center" title="居中对齐" data-align="center">
                                     <i class="fas fa-align-center"></i>
                                 </button>
-                                <button class="align-btn active" id="align-right" title="右对齐" data-align="right">
+                                <button class="align-btn" id="align-right" title="右对齐" data-align="right">
                                     <i class="fas fa-align-right"></i>
                                 </button>
                             </div>
