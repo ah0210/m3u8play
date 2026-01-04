@@ -140,8 +140,8 @@ function isValidUrl(url) {
         // 只允许http和https协议
         return ['http:', 'https:'].includes(urlObj.protocol);
     } catch (error) {
-        // 尝试处理相对URL或不完整URL
-        return /^https?:\/\/.+\.(m3u8|mp4|webm|ogg|avi|mov|wmv)$/i.test(url) || 
+        // 尝试处理相对URL或不完整URL，允许URL包含特殊字符
+        return /^https?:\/\/.+\.(m3u8|mp4|webm|ogg|avi|mov|wmv)/i.test(url) || 
                /^https?:\/\/.+\/playlist\.m3u8/i.test(url);
     }
 }
@@ -151,11 +151,10 @@ function isValidVideoUrl(url) {
         return false;
     }
     
-    // 验证是否为视频格式
+    // 验证是否为视频格式，允许URL包含特殊字符
     const videoExtensions = ['.m3u8', '.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv'];
-    return videoExtensions.some(ext => url.toLowerCase().endsWith(ext)) ||
-           /\/playlist\.m3u8/i.test(url) ||
-           /\.m3u8\?/i.test(url);
+    return videoExtensions.some(ext => url.toLowerCase().includes(ext)) ||
+           /\/playlist\.m3u8/i.test(url);
 }
 
 // 验证导入的播放历史项格式
@@ -1096,7 +1095,8 @@ async function loadVideo(url, restorePosition = false) {
 
     showLoading(i18n[currentLang].loadingText);
 
-    if (url.endsWith('.m3u8')) {
+    // 使用includes而不是endsWith，允许URL包含特殊字符
+    if (url.toLowerCase().includes('.m3u8')) {
         try {
             // 动态加载 hls.js
             if (!hlsLoaded) {
