@@ -1698,6 +1698,9 @@ function bindEvents() {
         });
     }
     
+    // 初始化播放历史列表
+    renderPlayHistory();
+    
     // 初始化居中播放按钮状态
     toggleCenterPlayBtn();
     
