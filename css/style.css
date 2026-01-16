@@ -1,7 +1,7 @@
 /* 基础样式 */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
-    padding: 20px; 
+    padding: 0; 
     font-family: Arial, sans-serif; 
     transition: background 0.3s, color 0.3s;
 }
@@ -14,43 +14,135 @@ body.dark {
     color: #e0e0e0;
 }
 
+/* 标题栏 */
+.title-bar {
+            text-align: center;
+            padding: 0 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 0;
+            border-radius: 0;
+            box-shadow: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .title-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .title-controls .control-group {
+            margin: 0;
+        }
+        .title-controls .select-control {
+            width: auto;
+            padding: 2px;
+            font-size: 12px;
+        }
+        .title-separator {
+            width: 1px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.3);
+            margin: 0 10px;
+        }
+.title-bar .title-content {
+    flex: 1;
+    text-align: center;
+}
+.title-bar h1 {
+    font-size: 1.5em;
+    margin: 0;
+    font-weight: 700;
+}
+.title-bar p {
+    font-size: 0.9em;
+    margin: 0;
+    opacity: 0.9;
+}
+.sidebar-toggle-btn {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.3s ease;
+}
+.sidebar-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
 /* 主布局 */
 .main-layout {
-    display: flex;
-    gap: 20px;
-    max-width: 1600px;
-    margin: 0 auto;
     position: relative;
+    display: flex;
+    gap: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 /* 播放器区域 */
 .player-area {
-    flex: 1;
+    width: calc(100% * 4 / 5);
     min-width: 0;
+    padding: 0;
+    margin-left: calc(100% / 5);
 }
 
-/* 侧边栏 - 优化：真正隐藏，不挤占播放页面 */
-.sidebar {
-    width: 350px;
-    background: #fff;
-    border-radius: 8px 0 0 8px;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.2);
-    overflow: hidden;
-    transition: transform 0.3s ease;
-    transform: translateX(100%);
-    position: fixed;
-    right: 0;
-    top: 0;
+/* 调整手柄 */
+.resize-handle {
+    width: 5px;
+    background: #ddd;
+    cursor: ew-resize;
     height: 100vh;
+    position: fixed;
+    left: calc(100% / 5);
+    top: 0;
+    z-index: 1001;
+    transition: background 0.3s ease;
+}
+
+.resize-handle:hover {
+    background: #667eea;
+}
+
+.resize-handle i {
+    display: none;
+}
+
+/* 侧边栏 - 移动到播放页面左侧 */
+.sidebar {
+    width: calc(100% / 5);
+    background: #fff;
+    border-radius: 0;
+    box-shadow: none;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+    transform: translateX(0);
+    position: fixed;
+    left: 0;
+    top: 40px;
+    height: calc(100vh - 40px);
     z-index: 1000;
     display: block;
-    pointer-events: none;
+    pointer-events: auto;
+    padding: 0;
+    border-right: 1px solid #eee;
 }
 
-.sidebar.show {
-    transform: translateX(0);
-    pointer-events: auto;
+.sidebar.hidden {
+    transform: translateX(-100%);
 }
+
+
 
 /* 确保播放区域不受侧边栏影响 */
 .player-area {
@@ -62,7 +154,7 @@ body.dark {
 .main-layout {
     position: relative;
     display: flex;
-    gap: 20px;
+   
     width: 100%;
     max-width: 100%;
     margin: 0;
@@ -81,33 +173,61 @@ body.player-align-right .player-wrap {
     margin: 0 0 0 auto !important;
 }
 
-/* 侧边栏切换按钮 - 优化：播放器内左上角 */
+/* 侧边栏切换按钮 - 隐藏，因为侧边栏默认显示 */
 .sidebar-toggle {
-    position: absolute;
-    left: 10px;
-    top: 10px;
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.3);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    z-index: 1001;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    backdrop-filter: blur(5px);
-    /* 确保按钮在播放器内部 */
-    pointer-events: auto;
+    display: none;
 }
 
-.sidebar-toggle:hover {
-    background: rgba(255, 255, 255, 0.5);
-    transform: scale(1.1);
+/* 播放历史侧边栏头部 */
+.history-header-top {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    height: 40px;
+    background-color: #f5f5f5;
+}
+
+.history-header-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    height: auto;
+    background-color: #ffffff;
+}
+
+.history-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+body.dark .history-header-top,
+body.dark .history-header-bottom {
+    border-bottom-color: #444;
+}
+
+body.dark .history-header-top {
+    background-color: #2a2a2a;
+}
+
+body.dark .history-header-bottom {
+    background-color: #1e1e1e;
+}
+
+.history-import-export {
+    display: flex;
+    gap: 5px;
+}
+
+.history-import-export button {
+    margin-left: 0;
+    margin-right: 5px;
 }
 
 /* 侧边栏历史面板 */
@@ -666,8 +786,8 @@ body.dark .log-panel {
     color: #e0e0e0;
 }
 .log-header {
-    padding: 8px 12px;
-    display: flex;
+    padding: 0px 0px;
+   
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
@@ -675,8 +795,7 @@ body.dark .log-panel {
 }
 
 .history-header-actions {
-    display: flex;
-    gap: 8px;
+   
     align-items: center;
 }
 
@@ -765,7 +884,7 @@ body.dark .log-header {
     background: #3d3d3d;
 }
 .log-body {
-    padding: 10px 12px;
+    padding: 0px;
     max-height: 200px;
     overflow-y: auto;
     display: none;
