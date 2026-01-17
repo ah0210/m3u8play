@@ -257,6 +257,13 @@ function addLog(message, type = 'info') {
     const now = new Date();
     const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
     
+    const logItem = document.createElement('div');
+    logItem.className = `log-item log-type-${type}`;
+    logItem.innerHTML = `<span class="log-time">[${timeStr}]</span><span>${message}</span>`;
+    
+    el.logBody.appendChild(logItem);
+    el.logBody.scrollTop = el.logBody.scrollHeight; // 滚动到底部
+
     // 控制台日志（方便调试）
     switch(type) {
         case 'error': console.error(`[Player] ${message}`); break;
@@ -1322,7 +1329,21 @@ function initShortcutKeys() {
         }
     });
 
-    // 快捷键功能已取消
+    el.shortcutBtn.addEventListener('click', () => {
+        el.shortcutTip.classList.add('show');
+        clearTimeout(shortcutTimer);
+        shortcutTimer = setTimeout(() => {
+            el.shortcutTip.classList.remove('show');
+        }, 5000);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target !== el.shortcutBtn && !el.shortcutTip.contains(e.target)) {
+            clearTimeout(shortcutTimer);
+            el.shortcutTip.classList.remove('show');
+        }
+    });
+
     addLog('初始化快捷键完成', 'info');
 }
 
@@ -1564,7 +1585,14 @@ function bindEvents() {
     // 缓存清理
     el.clearCacheBtn.addEventListener('click', clearCache);
 
-
+    // 日志面板
+    el.logHeader.addEventListener('click', () => {
+        el.logBody.classList.toggle('show');
+    });
+    el.logClear.addEventListener('click', () => {
+        el.logBody.innerHTML = '';
+        addLog('日志已清空', 'info');
+    });
 
     // 网络状态
     window.addEventListener('online', handleNetworkStatus);
@@ -1597,11 +1625,11 @@ function bindEvents() {
     }
 
     // 侧边栏切换功能
-    if (el.historySidebarToggle && el.sidebar) {
-        el.historySidebarToggle.addEventListener('click', async () => {
-            el.sidebar.classList.toggle('hidden');
+    if (el.sidebarToggle && el.sidebar) {
+        el.sidebarToggle.addEventListener('click', async () => {
+            el.sidebar.classList.toggle('show');
             // 确保历史记录列表显示
-            if (!el.sidebar.classList.contains('hidden') && el.historyBody) {
+            if (el.sidebar.classList.contains('show') && el.historyBody) {
                 el.historyBody.classList.add('show');
             }
             // 渲染播放历史列表
@@ -1655,51 +1683,6 @@ function bindEvents() {
             await renderPlayHistory('hot');
         });
     }
-    
-    // 调整手柄功能
-    const resizeHandle = document.getElementById('resize-handle');
-    const sidebar = document.getElementById('sidebar');
-    const playerArea = document.querySelector('.player-area');
-    
-    if (resizeHandle && sidebar && playerArea) {
-        let isResizing = false;
-        let startX = 0;
-        let startWidth = 0;
-        
-        resizeHandle.addEventListener('mousedown', (e) => {
-            isResizing = true;
-            startX = e.clientX;
-            startWidth = parseInt(document.defaultView.getComputedStyle(sidebar).width, 10);
-            document.body.style.cursor = 'ew-resize';
-            e.preventDefault();
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (!isResizing) return;
-            
-            const deltaX = e.clientX - startX;
-            const newWidth = startWidth + deltaX;
-            
-            // 限制最小宽度
-            if (newWidth < 200) return;
-            
-            // 限制最大宽度
-            if (newWidth > window.innerWidth / 2) return;
-            
-            sidebar.style.width = `${newWidth}px`;
-            playerArea.style.width = `${window.innerWidth - newWidth - 5}px`;
-            resizeHandle.style.left = `${newWidth}px`;
-            playerArea.style.marginLeft = `${newWidth + 5}px`;
-        });
-        
-        document.addEventListener('mouseup', () => {
-            isResizing = false;
-            document.body.style.cursor = '';
-        });
-    }
-    
-    // 初始化播放历史列表
-    renderPlayHistory();
     
     // 初始化居中播放按钮状态
     toggleCenterPlayBtn();

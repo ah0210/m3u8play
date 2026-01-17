@@ -4,27 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title id="pageTitle">终极版 M3U8/MP4 播放器</title>
-    <style>
-        .title-bar {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .title-bar h1 {
-            font-size: 2.5em;
-            margin: 0 0 10px 0;
-            font-weight: 700;
-        }
-        .title-bar p {
-            font-size: 1.2em;
-            margin: 0;
-            opacity: 0.9;
-        }
-    </style>
     
     <!-- SEO元标签 -->
     <meta name="description" content="一个功能强大的M3U8/MP4视频播放器，支持多种播放格式和自定义控制">
@@ -56,66 +35,9 @@
     </head>
 <body class="light">
     <div class="main-layout">
-        <!-- 历史记录侧边栏 -->
-        <div class="sidebar" id="sidebar">
-            <div class="log-panel history-sidebar" id="history-panel">
-                <div class="log-header" id="history-header">
-                    <div class="history-header-top">
-                        <div class="history-import-export">
-                            <button class="log-clear" id="history-export" data-text="导出历史" aria-label="导出播放历史">
-                                <i class="fas fa-download"></i>
-                                <span>导出历史</span>
-                            </button>
-                            <input type="file" id="history-import-input" accept=".json" style="display: none;">
-                            <button class="log-clear" id="history-import" data-text="导入历史" aria-label="导入播放历史">
-                                <i class="fas fa-upload"></i>
-                                <span>导入历史</span>
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="log-body" id="history-body">
-                    <div class="history-empty" id="history-empty">暂无播放历史</div>
-                </div>
-            </div>
-        </div>
-        <!-- 调整手柄 -->
-        <div class="resize-handle" id="resize-handle">
-            <i class="fas fa-grip-vertical"></i>
-        </div>
         <!-- 播放器区域 -->
         <div class="player-area">
             <div class="player-wrap">
-                <!-- 标题栏 -->
-                <div class="title-bar">
-                    <button class="sidebar-toggle-btn" id="history-sidebar-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="title-content">
-                        <h1>m3u8播放器</h1>
-                    </div>
-                    <!-- 语言和主题选择 -->
-                    <div class="title-controls">
-                        <!-- 语言选择 -->
-                        <div class="control-group">
-                            <span id="langLabel">语言</span>
-                            <select class="select-control" id="lang-select">
-                                <option value="zh-CN" selected>中文</option>
-                                <option value="en-US">English</option>
-                            </select>
-                        </div>
-                        <!-- 主题选择 -->
-                        <div class="control-group">
-                            <span id="themeLabel">主题</span>
-                            <select class="select-control" id="theme-select">
-                                <option value="light" selected>亮色</option>
-                                <option value="dark">暗色</option>
-                            </select>
-                        </div>
-                    </div>
-
-                </div>
                 <!-- 视频区域 + 加载遮罩 + 触摸提示 -->
                 <div class="video-container">
                     <video id="video-player"></video>
@@ -125,6 +47,10 @@
                     </div>
                     <div class="touch-tip" id="touch-tip">双击播放/暂停</div>
                     <div class="status-tip" id="status-tip"></div>
+                    <!-- 侧边栏切换按钮 - 播放器内左上角 -->
+                    <button class="sidebar-toggle" id="sidebar-toggle" title="切换历史记录">
+                        <i class="fas fa-history"></i>
+                    </button>
                     <!-- 居中播放按钮 -->
                     <button class="center-play-btn" id="center-play-btn">
                         <i class="fas fa-play"></i>
@@ -151,7 +77,9 @@
                         <button class="control-btn" id="screenshot-btn" disabled>
                             <i class="fas fa-camera"></i> <span>截图</span>
                         </button>
-
+                        <button class="control-btn" id="shortcut-btn">
+                            <i class="fas fa-keyboard"></i> <span>快捷键</span>
+                        </button>
                         <button class="control-btn" id="clear-cache-btn">
                             <i class="fas fa-trash"></i> <span>清理缓存</span>
                         </button>
@@ -161,7 +89,23 @@
                             <i class="fas fa-question-circle"></i> <span>帮助</span>
                         </button>
                         
+                        <!-- 语言选择 -->
+                        <div class="control-group">
+                            <span id="langLabel">语言</span>
+                            <select class="select-control" id="lang-select">
+                                <option value="zh-CN" selected>中文</option>
+                                <option value="en-US">English</option>
+                            </select>
+                        </div>
 
+                        <!-- 主题选择 -->
+                        <div class="control-group">
+                            <span id="themeLabel">主题</span>
+                            <select class="select-control" id="theme-select">
+                                <option value="light" selected>亮色</option>
+                                <option value="dark">暗色</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- 第二行：进度条 + 扩展控制 -->
@@ -199,12 +143,58 @@
                             </select>
                         </div>
 
-
+                        <!-- 对齐方式选择 -->
+                        <div class="control-group">
+                            <span id="alignLabel">对齐</span>
+                            <div class="align-controls">
+                                <button class="align-btn" id="align-left" title="左对齐" data-align="left">
+                                    <i class="fas fa-align-left"></i>
+                                </button>
+                                <button class="align-btn active" id="align-center" title="居中对齐" data-align="center">
+                                    <i class="fas fa-align-center"></i>
+                                </button>
+                                <button class="align-btn" id="align-right" title="右对齐" data-align="right">
+                                    <i class="fas fa-align-right"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- 历史记录侧边栏 -->
+        <div class="sidebar" id="sidebar">
+            <div class="log-panel history-sidebar" id="history-panel">
+                <div class="log-header" id="history-header">
+                    <span id="historyTitle">播放历史</span>
+                    <div class="history-header-actions">
+                        <div class="sort-controls">
+                    <span>排序：</span>
+                    <button class="sort-btn active" id="sort-recent" data-sort="recent" data-text="最新">
+                        <i class="fas fa-clock"></i>
+                    </button>
+                    <button class="sort-btn" id="sort-hot" data-sort="hot" data-text="热度">
+                        <i class="fas fa-fire"></i>
+                    </button>
+                </div>
+                <button class="log-clear" id="history-export" data-text="导出历史">
+                    <i class="fas fa-download"></i>
+                </button>
+                <input type="file" id="history-import-input" accept=".json" style="display: none;">
+                <button class="log-clear" id="history-import" data-text="导入历史">
+                    <i class="fas fa-upload"></i>
+                </button>
+                <button class="log-clear" id="history-clear" data-text="清空历史">
+                    <i class="fas fa-trash"></i>
+                </button>
+                    </div>
+                </div>
+                <div class="log-body" id="history-body">
+                    <div class="history-empty" id="history-empty">暂无播放历史</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 截图预览弹窗 -->
@@ -229,6 +219,15 @@
             <li><span class="key">P</span><span id="shortcutPip">画中画/退出</span></li>
             <li><span class="key">S</span><span id="shortcutScreenshot">截图</span></li>
         </ul>
+    </div>
+
+    <!-- 日志面板 -->
+    <div class="log-panel">
+        <div class="log-header" id="log-header">
+            <span id="logTitle">播放日志</span>
+            <button class="log-clear" id="log-clear">清空日志</button>
+        </div>
+        <div class="log-body" id="log-body"></div>
     </div>
 
     <!-- 帮助弹窗 -->
