@@ -1,7 +1,7 @@
 // 缓存名称和版本
 const CACHE_NAME = 'video-player-v1';
 const urlsToCache = [
-  './play.html',
+  './index.html',
   './manifest.json',
   'https://cdn.jsdelivr.net/npm/hls.js@latest'
 ];
@@ -105,7 +105,7 @@ self.addEventListener('push', (event) => {
     badge: 'icons/icon-96x96.png',
     vibrate: [100, 50, 100],
     data: {
-      url: data.url || './play.html'
+      url: data.url || './index.html'
     }
   };
   
