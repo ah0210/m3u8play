@@ -1168,14 +1168,6 @@ function historyItemClickHandler(e) {
         const url = target.closest('.history-item-play').dataset.url;
         el.urlInput.value = url;
         loadVideo(url);
-        // 关闭播放列表
-        if (el.historyBody) {
-            el.historyBody.classList.remove('show');
-        }
-        // 关闭整个侧边栏
-        if (el.sidebar) {
-            el.sidebar.classList.remove('show');
-        }
     }
     
     // 处理删除按钮点击
@@ -1674,14 +1666,19 @@ function importPlaylist(file) {
 
 // 加载播放列表
 async function loadPlaylist(playlistId) {
-    // 这里需要实现从IndexedDB加载播放列表的功能
     const historyBody = document.getElementById('history-body');
     const historyEmpty = document.getElementById('history-empty');
     
-    // 模拟加载播放列表内容
+    if (playlistId === 'default') {
+        // 如果是默认播放列表，显示播放历史记录
+        await renderPlayHistory();
+        addLog(`切换到默认播放列表`, 'info');
+        return;
+    }
+    
+    // 否则从IndexedDB加载播放列表
     historyBody.innerHTML = '';
     
-    // 从IndexedDB加载播放列表
     const playHistory = await loadPlaylistFromIndexedDB(playlistId);
     
     if (playHistory.length === 0) {
@@ -2239,19 +2236,6 @@ function bindEvents() {
         });
     }
     
-    // 刷新播放列表
-    const playlistRefreshBtn = document.getElementById('playlist-refresh');
-    if (playlistRefreshBtn) {
-        playlistRefreshBtn.addEventListener('click', async () => {
-            const playlistSelect = document.getElementById('playlist-select');
-            const playlistId = playlistSelect.value;
-            await loadPlaylist(playlistId);
-            addLog(`刷新播放列表：${playlistId}`, 'info');
-        });
-    }
-    
-
-    
     // 调整手柄功能
     const resizeHandle = document.getElementById('resize-handle');
     const sidebar = document.getElementById('sidebar');
@@ -2503,8 +2487,89 @@ window.onload = async () => {
         addLog(`使用默认视频URL：${defaultUrl}`, 'info');
     }
     
+    // 加载播放历史记录列表
+    await renderPlayHistory();
+    // 确保历史记录列表显示
+    if (el.historyBody) {
+        el.historyBody.classList.add('show');
+    }
+    
+    // 检查播放历史记录是否为空，如果为空则自动导入默认播放历史文件
+    const playHistoryStorage = getPlayHistoryStorage();
+    if (playHistoryStorage) {
+        const historyList = await playHistoryStorage.getAllRecords();
+        if (historyList.length === 0) {
+            const hasAutoImported = localStorage.getItem('hasAutoImported');
+            if (!hasAutoImported) {
+                await autoImportDefaultPlaylist();
+            }
+        }
+    }
+    
     addLog('播放器初始化完成', 'success');
 };
+
+// 自动导入默认播放历史文件
+async function autoImportDefaultPlaylist() {
+    try {
+        const response = await fetch('/play-history-2026-01-17.m3u');
+        if (!response.ok) {
+            throw new Error('文件不存在或无法访问');
+        }
+        
+        const content = await response.text();
+        const lines = content.split('\n');
+        const playHistory = [];
+        let currentTitle = '';
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            
+            if (line.startsWith('#EXTINF:')) {
+                const parts = line.split(',');
+                if (parts.length > 1) {
+                    currentTitle = parts.slice(1).join(',').trim();
+                }
+            } else if (line && !line.startsWith('#')) {
+                if (currentTitle && line) {
+                    playHistory.push({
+                        url: line,
+                        title: currentTitle,
+                        date: new Date().toISOString(),
+                        time: 0,
+                        duration: 0,
+                        playCount: 1
+                    });
+                    currentTitle = '';
+                }
+            }
+        }
+        
+        if (playHistory.length === 0) {
+            throw new Error('没有找到有效的播放历史记录');
+        }
+        
+        const playlistSelect = document.getElementById('playlist-select');
+        const newPlaylistId = `auto_imported_${Date.now()}`;
+        const newPlaylistName = `自动导入的播放列表_${new Date().toISOString().slice(0, 10)}`;
+        
+        const option = document.createElement('option');
+        option.value = newPlaylistId;
+        option.textContent = newPlaylistName;
+        playlistSelect.appendChild(option);
+        
+        const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+        playlists.push({ id: newPlaylistId, name: newPlaylistName });
+        localStorage.setItem('playlists', JSON.stringify(playlists));
+        
+        savePlaylistToIndexedDB(newPlaylistId, playHistory);
+        
+        addLog(`自动导入播放历史：${playHistory.length}条记录，已创建新播放列表：${newPlaylistName}`, 'success');
+        localStorage.setItem('hasAutoImported', 'true');
+    } catch (error) {
+        addLog(`自动导入播放历史失败：${error.message}`, 'info');
+    }
+}
 
 // 关闭帮助弹窗时记录到缓存
 function closeHelpModal() {
