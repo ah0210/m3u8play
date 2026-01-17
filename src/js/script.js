@@ -2,6 +2,11 @@
 let Hls = null;
 let hlsLoaded = false;
 
+// 确保i18n可用
+if (typeof window.i18n === 'undefined') {
+    console.error('i18n is not defined');
+}
+
 async function loadHlsJs() {
     if (hlsLoaded) return;
     

@@ -201,8 +201,4 @@ class PlayHistoryStorage {
 // 导出单例实例
 const playHistoryStorage = new PlayHistoryStorage();
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PlayHistoryStorage;
-} else {
-    window.playHistoryStorage = playHistoryStorage;
-}
+window.playHistoryStorage = playHistoryStorage;

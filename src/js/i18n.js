@@ -130,9 +130,4 @@ const i18n = {
     }
 };
 
-// 导出i18n配置
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = i18n;
-} else if (typeof window !== 'undefined') {
-    window.i18n = i18n;
-}
+window.i18n = i18n;
