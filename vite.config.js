@@ -46,6 +46,7 @@ export default defineConfig({
           return 'js/[name].[hash].js';
         }
       }
-    }
+    },
+    copyPublicDir: true
   }
 });
