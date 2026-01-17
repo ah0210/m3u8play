@@ -100,26 +100,31 @@ body.dark {
 /* 调整手柄 */
 .resize-handle {
     width: 5px;
-    background: #ddd;
+    background: transparent;
     cursor: ew-resize;
     height: 100vh;
     position: fixed;
     left: calc(100% / 5);
     top: 0;
     z-index: 1001;
-    transition: background 0.3s ease;
+    transition: background 0.2s ease;
 }
 
 .resize-handle:hover {
-    background: #667eea;
+    background: rgba(102, 126, 234, 0.8);
 }
 
 body.dark .resize-handle {
-    background: #444;
+    background: transparent;
 }
 
 body.dark .resize-handle:hover {
-    background: #667eea;
+    background: rgba(102, 126, 234, 0.8);
+}
+
+body.resizing .resize-handle,
+body.dark.resizing .resize-handle {
+    background: rgba(102, 126, 234, 0.8);
 }
 
 .resize-handle i {

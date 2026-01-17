@@ -440,6 +440,64 @@ function importM3uText(text) {
     showStatus(message, 'success');
 }
 
+function removeUrlFromPlaylist(url) {
+    if (!url) return false;
+    const state = getPlaylistState();
+    const index = state.items.findIndex(it => it?.url === url);
+    if (index < 0) return false;
+    state.items.splice(index, 1);
+    savePlaylistState(state);
+    if (el.playlistModal?.classList.contains('show')) {
+        renderPlaylist();
+    }
+    return true;
+}
+
+function autoRemovePlaylistUrlOnError(url) {
+    const removed = removeUrlFromPlaylist(url);
+    if (!removed) return;
+    showStatus(
+        currentLang === 'zh-CN' ? '播放失败，已从导入列表移除该地址' : 'Playback failed, removed from imported list',
+        'error'
+    );
+}
+
+async function exportPlayHistoryAsM3U() {
+    const playHistoryStorage = getPlayHistoryStorage();
+    if (!playHistoryStorage) {
+        showStatus(currentLang === 'zh-CN' ? '播放历史不可用，无法导出' : 'Play history unavailable', 'error');
+        return;
+    }
+
+    const historyList = await playHistoryStorage.getAllRecords({ sortBy: 'date', sortOrder: 'desc', limit: 10000 });
+    if (!historyList.length) {
+        showStatus(currentLang === 'zh-CN' ? '播放历史为空，无法导出' : 'Play history is empty', 'error');
+        return;
+    }
+
+    const lines = ['#EXTM3U'];
+    for (const item of historyList) {
+        const title = item?.title ? String(item.title) : String(item?.url || '');
+        const url = item?.url ? String(item.url) : '';
+        if (!url) continue;
+        lines.push(`#EXTINF:-1,${title}`);
+        lines.push(url);
+    }
+
+    const text = lines.join('\n') + '\n';
+    const blob = new Blob([text], { type: 'audio/x-mpegurl;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = `play-history-${new Date().toISOString().slice(0, 10)}.m3u`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+
+    showStatus(currentLang === 'zh-CN' ? '已导出播放历史为 M3U' : 'Exported play history as M3U', 'success');
+}
+
 // ========== 3. 工具函数：国际化 ==========
 function updateI18n(lang) {
     currentLang = lang;
@@ -1417,6 +1475,7 @@ async function loadVideo(url, restorePosition = false) {
                                 errorText = i18n[currentLang].statusErrorUnknown.replace('{msg}', data.details);
                                 // 保存当前状态，然后彻底清理
                                 const currentUrl = currentVideoUrl;
+                                autoRemovePlaylistUrlOnError(currentUrl);
                                 // 先销毁HLS实例
                                 hls.destroy();
                                 hls = null;
@@ -1459,6 +1518,7 @@ async function loadVideo(url, restorePosition = false) {
                     hideLoading();
                     const errorMsg = currentLang === 'zh-CN' ? '视频加载失败：无法播放此格式' : 'Video load failed: Format not supported';
                     showStatus(i18n[currentLang].statusErrorVideo.replace('{msg}', errorMsg), 'error');
+                    autoRemovePlaylistUrlOnError(currentVideoUrl);
                 }, { once: true });
             } else {
                 hideLoading();
@@ -1520,6 +1580,7 @@ async function loadVideo(url, restorePosition = false) {
         
         const errorText = i18n[currentLang].statusErrorVideo.replace('{msg}', errorMsg);
         showStatus(errorText, 'error');
+        autoRemovePlaylistUrlOnError(currentVideoUrl);
     }, { once: true });
     }
     } catch (error) {
@@ -2160,22 +2221,13 @@ function bindEvents() {
     
     if (playlistImportBtn) {
         playlistImportBtn.addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    importPlaylist(file);
-                }
-            };
-            input.click();
+            openPlaylistModal();
         });
     }
     
     if (playlistExportBtn) {
-        playlistExportBtn.addEventListener('click', () => {
-            exportPlaylist(playlistSelect.value);
+        playlistExportBtn.addEventListener('click', async () => {
+            await exportPlayHistoryAsM3U();
         });
     }
     
@@ -2215,6 +2267,8 @@ function bindEvents() {
             startX = e.clientX;
             startWidth = parseInt(document.defaultView.getComputedStyle(sidebar).width, 10);
             document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+            document.body.classList.add('resizing');
             e.preventDefault();
         });
         
@@ -2239,6 +2293,8 @@ function bindEvents() {
         document.addEventListener('mouseup', () => {
             isResizing = false;
             document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            document.body.classList.remove('resizing');
         });
     }
     
