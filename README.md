@@ -58,6 +58,8 @@
 - **CSS3** - 样式设计
 - **JavaScript (ES6+)** - 核心逻辑
 - **HLS.js** - M3U8 格式支持
+- **IndexedDB** - 播放历史/列表本地存储
+- **Vite** - 开发/构建工具链
 - **Service Worker** - 离线缓存
 - **PWA (Progressive Web App)** - 应用化支持
 
@@ -66,10 +68,10 @@
 ### 方法一：直接使用
 
 1. 下载项目文件
-2. 直接在浏览器中打开 `file:///F:/m3u8play/play.html` 文件
-3. 在输入框中输入视频 URL，点击"播放"按钮
-4. 开始播放视频
-5. 如果使用扩展，在扩展管理页面开启：允许访问文件 URL；网站权限设置为「在所有网站上」；
+2. 直接在浏览器中打开根目录的 `index.html`
+3. 在输入框中输入视频 URL，开始播放
+
+> 说明：部分浏览器会限制 `file://` 场景下的能力（例如 Service Worker / PWA），建议使用下方“本地开发服务器”方式运行。
 
 ### 方法二：本地服务器运行（推荐）
 
@@ -82,30 +84,44 @@
    ```bash
    npm install
    ```
-4. 启动本地服务器：
+4. 启动开发服务器：
    ```bash
-   npm start
+   npm run dev
    ```
 5. 在浏览器中访问：
    ```
-   http://localhost:3000
+   http://localhost:5173
    ```
 
-### 方法三：部署到服务器
+### 方法三：构建与预览（部署前建议）
 
-1. 将项目文件上传到您的 Web 服务器
-2. 通过浏览器访问 `play.html` 文件的 URL
-3. 开始使用播放器
+1. 构建生产产物：
+   ```bash
+   npm run build
+   ```
+2. 本地预览生产产物：
+   ```bash
+   npm run preview
+   ```
+3. 在浏览器中访问：
+   ```
+   http://localhost:4173
+   ```
+
+### 方法四：部署到服务器
+
+1. 执行 `npm run build` 生成 `dist/`
+2. 将 `dist/` 上传到静态托管（Nginx / GitHub Pages / Netlify / Vercel 等）
+3. 访问部署后的站点即可使用播放器
 
 ### 常用命令
 
 | 命令 | 功能 |
 |------|------|
 | `npm install` | 安装本地依赖 |
-| `npm start` | 启动本地服务器 |
-| `npm run stop` | 停止本地服务器 |
-| `npm run dev` | 开发模式（与 start 命令功能相同） |
-| `npm run serve` | 启动静态文件服务（与 start 命令功能相同） |
+| `npm run dev` | 启动开发服务器（Vite） |
+| `npm run build` | 构建生产产物到 `dist/` |
+| `npm run preview` | 本地预览 `dist/`（需先 build） |
 
 ### 关于依赖
 
@@ -206,11 +222,10 @@
 ```
 m3u8play/
 ├── index.html          # 主播放器页面
-├── play.html           # 主播放器页面（兼容旧版本）
 ├── README.md          # 项目说明文档
 ├── package.json       # 项目依赖配置
 ├── manifest.json      # PWA 配置文件
-├── play-history-2026-01-17.m3u  # 默认播放历史文件
+├── vite.config.js     # Vite 配置
 ├── css/               # CSS 样式文件
 │   └── style.css      # 主样式文件
 ├── js/                # JavaScript 文件
@@ -218,6 +233,8 @@ m3u8play/
 │   ├── i18n.js        # 国际化配置
 │   ├── storage.js     # IndexedDB 存储管理
 │   └── service-worker.js # 服务工作线程，负责离线缓存
+├── scripts/           # 构建后处理脚本
+│   └── copy-files.js  # 将额外文件复制到 dist，并修复资源引用
 ├── src/               # 源代码目录
 │   ├── index.html     # 源HTML文件
 │   ├── manifest.json  # PWA配置文件
@@ -236,6 +253,7 @@ m3u8play/
 │       ├── icon-512x512.png  # 512x512像素图标
 │       ├── icon-maskable-192x192.png  # 192x192像素遮罩图标
 │       └── icon-maskable-512x512.png  # 512x512像素遮罩图标
+├── dist/              # 构建产物（npm run build 生成）
 └── icons/             # 应用图标
     ├── icon.svg       # SVG 图标模板
     ├── icon-96x96.png    # 96x96 像素图标
@@ -257,7 +275,7 @@ m3u8play/
 
 ### 缓存管理
 
-点击"清理缓存"按钮可清除所有本地存储的倍速设置和主题偏好等设置。
+点击“清理缓存”按钮可清除播放器相关设置（倍速/主题/语言/音量/画质/对齐/排序/上次播放地址等），保留播放记录。
 
 ## 开发和调试
 
@@ -271,8 +289,8 @@ m3u8play/
 
 ### 开发模式说明
 
-- 使用 `npm run dev` 或 `npm run serve` 启动开发服务器
-- 服务器默认监听 3000 端口，访问地址：`http://localhost:3000`
+- 使用 `npm run dev` 启动开发服务器
+- 开发服务器默认监听 5173 端口，访问地址：`http://localhost:5173`
 - 支持热重载（修改代码后刷新页面即可）
 - 提供详细的日志输出，便于调试
 
@@ -316,7 +334,7 @@ A: 可能的原因：
 
 A: 您可以通过 iframe 方式嵌入：
 ```html
-<iframe src="path/to/play.html" width="100%" height="500px" frameborder="0"></iframe>
+<iframe src="path/to/index.html" width="100%" height="500px" frameborder="0"></iframe>
 ```
 
 ## 许可证
@@ -328,6 +346,9 @@ A: 您可以通过 iframe 方式嵌入：
 欢迎提交 Issue 和 Pull Request，共同改进这个播放器！
 
 ## 更新日志
+
+### v1.2.1 (2026-02-06)
+- 标题栏增加“自游人”链接与不蒜子 PV/UV 统计展示
 
 ### v1.2.0 (2026-01-17)
 - 新增播放历史记录管理功能
@@ -342,14 +363,8 @@ A: 您可以通过 iframe 方式嵌入：
 - 优化播放按钮交互，点击播放不关闭播放历史列表
 
 ### v1.1.1 (2025-12-31)
-- 新增启动和停止本地服务的脚本
-- 支持 `npm start` 启动服务
-- 支持 `npm run stop` 停止服务
-- 自动检查服务状态，避免重复启动
-- 轻量级实现，不依赖额外重型库
-- 跨平台支持（Windows/macOS/Linux）
-- 视频链接输入框新增清除按钮
 - 优化了输入框的用户体验
+- 视频链接输入框新增清除按钮
 
 ### v1.1.0 (2025-12-31)
 - 添加了package.json，支持本地serve依赖

@@ -1312,3 +1312,49 @@ body.dark .help-section a {
 body.dark .help-section a:hover {
     color: #4a7de8;
 }
+
+.site-footer {
+    max-width: 1200px;
+    margin: 15px auto 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 12px;
+    transition: background 0.3s, color 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+body.light .site-footer {
+    background: #f0f0f0;
+    color: #333;
+}
+
+body.dark .site-footer {
+    background: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.site-footer a {
+    text-decoration: none;
+}
+
+body.light .site-footer a {
+    color: #4285f4;
+}
+
+body.dark .site-footer a {
+    color: #5c8ef7;
+}
+
+.site-footer a:hover {
+    text-decoration: underline;
+}
+
+#busuanzi_value_site_pv,
+#busuanzi_value_site_uv {
+    font-weight: 600;
+}
