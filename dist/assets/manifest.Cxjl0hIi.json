@@ -2,9 +2,9 @@
   "name": "M3U8/MP4 播放器",
   "short_name": "视频播放器",
   "description": "一个功能强大的M3U8/MP4视频播放器，支持多种播放格式和自定义控制",
-  "id": "./index.html",
-  "start_url": "./",
-  "scope": "./",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "display_override": [
     "fullscreen",
@@ -52,7 +52,7 @@
       "name": "加载视频",
       "short_name": "加载",
       "description": "快速加载新视频",
-      "url": "./#load",
+      "url": "/#load",
       "icons": [
         {
           "src": "/icons/icon-96x96.png",
@@ -64,7 +64,7 @@
       "name": "播放历史",
       "short_name": "历史",
       "description": "查看播放历史",
-      "url": "./#history",
+      "url": "/#history",
       "icons": [
         {
           "src": "/icons/icon-96x96.png",
@@ -81,7 +81,7 @@
   "protocol_handlers": [
     {
       "protocol": "web+video",
-      "url": "./?url=%s"
+      "url": "/?url=%s"
     }
   ]
 }
